@@ -1,0 +1,10 @@
+# Resources
+threads:
+  other: 1
+  chewbbaca_preparation: 8
+  chewbbaca: 10
+mem_gb:
+  other: 8
+  chewbbaca_preparation: 8
+  chewbbaca: 24
+

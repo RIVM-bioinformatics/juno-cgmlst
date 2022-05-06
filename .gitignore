@@ -1,0 +1,8 @@
+output/
+.snakemake/
+__pycache__/
+envs/src/
+
+
+config/user_parameters.yaml
+config/sample_sheet.yaml
