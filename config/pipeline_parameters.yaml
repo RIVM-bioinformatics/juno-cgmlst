@@ -1,10 +1,12 @@
 # Resources
 threads:
   other: 1
+  download_scheme: 2
   chewbbaca_preparation: 8
   chewbbaca: 10
 mem_gb:
   other: 8
+  download_scheme: 10
   chewbbaca_preparation: 8
   chewbbaca: 24
 

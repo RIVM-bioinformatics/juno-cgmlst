@@ -21,13 +21,11 @@ sample_sheet = config["sample_sheet"]
 SAMPLES = {}
 with open(sample_sheet) as sample_sheet_file:
     SAMPLES = safe_load(sample_sheet_file)
-SCHEMES = set(
-    [
-        SAMPLES[sample]['cgmlst_scheme'] 
-        for sample in SAMPLES 
-        if SAMPLES[sample]['cgmlst_scheme'] is not None
-    ]
-)
+SCHEMES = set()
+for sample in SAMPLES:
+    for scheme_ in SAMPLES[sample]['cgmlst_scheme']:
+        if scheme_ is not None:
+            SCHEMES.add(scheme_)
 
 # OUT defines output directory for most rules.
 OUT = config["out"]
@@ -68,6 +66,7 @@ python bin/chewbbaca_input_files.py --sample-sheet {input} \
     --output-dir {params.output_dir} &> {log}
         """
 
+
 #----------------------- Choose cgMLST scheme per genus ----------------------#
 
 rule cgmlst_per_scheme:
@@ -87,7 +86,7 @@ rule cgmlst_per_scheme:
         db_dir = CGMLST_DB
     shell:
         """
-bash bin/chewbbaca_per_genus.sh {input} \
+bash bin/chewbbaca_per_genus.sh {input.input_files} \
     {threads} \
     {params.output_dir} \
     {params.db_dir} \

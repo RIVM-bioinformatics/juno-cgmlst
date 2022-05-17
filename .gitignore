@@ -2,6 +2,7 @@ output/
 .snakemake/
 __pycache__/
 envs/src/
+.pytest_cache/
 
 
 config/user_parameters.yaml

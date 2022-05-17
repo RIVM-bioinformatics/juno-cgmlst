@@ -17,7 +17,7 @@ import yaml
 import sys
 
 # Own scripts
-import bin.download_cgmlst_scheme
+from bin import download_cgmlst_scheme
 
 class JunoCgmlstRun(base_juno_pipeline.PipelineStartup,
                     base_juno_pipeline.RunSnakemake):
@@ -34,6 +34,7 @@ class JunoCgmlstRun(base_juno_pipeline.PipelineStartup,
                 metadata=None, 
                 db_dir="/mnt/db/juno/cgmlst_db", 
                 cores=300,
+                time_limit=60,
                 local=False,
                 queue='bio',
                 unlock=False,
@@ -49,7 +50,10 @@ class JunoCgmlstRun(base_juno_pipeline.PipelineStartup,
         output_dir = pathlib.Path(output_dir).resolve()
         workdir = pathlib.Path(__file__).parent.resolve()
         self.db_dir = pathlib.Path(db_dir).resolve()
+        self.downloaded_schemes_dir = self.db_dir.joinpath('downloaded_schemes')
+        self.prepared_schemes_dir = self.db_dir.joinpath('prepared_schemes')
         self.path_to_audit = output_dir.joinpath('audit_trail')
+        self.cores = cores
         base_juno_pipeline.PipelineStartup.__init__(self,
             input_dir=pathlib.Path(input_dir).resolve(), 
             input_type='fasta',
@@ -59,7 +63,8 @@ class JunoCgmlstRun(base_juno_pipeline.PipelineStartup,
             pipeline_version='v0.1',
             output_dir=output_dir,
             workdir=workdir,
-            cores=cores,
+            cores=self.cores,
+            time_limit=time_limit,
             local=local,
             queue=queue,
             unlock=unlock,
@@ -90,7 +95,7 @@ class JunoCgmlstRun(base_juno_pipeline.PipelineStartup,
             try:
                 self.sample_dict[sample]['cgmlst_scheme'] = self.cgmlst_scheme_translation_tbl[genus]
             except KeyError:
-                self.sample_dict[sample]['cgmlst_scheme'] = None
+                self.sample_dict[sample]['cgmlst_scheme'] = [None]
 
     def update_sample_dict_with_metadata(self):
         self.get_metadata_from_csv_file(
@@ -139,12 +144,38 @@ class JunoCgmlstRun(base_juno_pipeline.PipelineStartup,
 
         return config_params     
         
+    def download_missing_schemes(self):
+        all_needed_schemes = set()
+        for sample in self.sample_dict:
+            try:
+                schemes = self.sample_dict[sample]['cgmlst_scheme']
+            except:
+                raise ValueError(
+                    f'There is no cgmlst_scheme assigned to sample {sample}' \
+                    ' Did you try to look for the scheme before you assigned ' \
+                    'metadata to the samples?'
+                )
+            for scheme in schemes:
+                if scheme is not None:
+                    if not self.prepared_schemes_dir.joinpath(scheme).is_dir():
+                        end_file_download = self.downloaded_schemes_dir.joinpath(scheme, 'downloaded_scheme.yaml')
+                        if not end_file_download.is_file():
+                            all_needed_schemes.add(scheme)
+        if len(all_needed_schemes) > 0:
+            download_cgmlst_scheme.cgMLSTSchemes(
+                threads=self.cores, genus_list=all_needed_schemes, 
+                download_loci=True,
+                output_dir=self.downloaded_schemes_dir
+            )
+
+
     def run_juno_cgmlst_pipeline(self):
         self.start_juno_cgmlst_pipeline()
         self.user_params = self.write_userparameters()
         self.get_run_info()
         if not self.dryrun or self.unlock:
             self.path_to_audit.mkdir(parents=True, exist_ok=True)
+            self.download_missing_schemes()
 
         self.successful_run = self.run_snakemake()
         assert self.successful_run, f'Please check the log files'
@@ -177,7 +208,7 @@ if __name__ == '__main__':
         "--metadata",
         type = pathlib.Path,
         default = None,
-        required=not '--genus' in sys.argv and not '-g' in sys.argv,
+        required=False,
         metavar = "FILE",
         help = "Relative or absolute path to the metadata csv file. If "\
             "provided, it must contain at least one column named 'sample' "\
@@ -192,7 +223,7 @@ if __name__ == '__main__':
         "-g",
         "--genus",
         default=None,
-        required = not '--metadata' in sys.argv and not '-m' in sys.argv,
+        required = False,
         metavar = "FILE",
         help = "Genus name (any genus in the metadata file will overwrite"\
             " this argument). It should be given as two words (e.g. "\
@@ -232,6 +263,14 @@ if __name__ == '__main__':
         help = 'Name of the queue that the job will be submitted to if working on a cluster.'
     )
     parser.add_argument(
+        "-w",
+        "--time-limit",
+        type = int,
+        metavar = "INT",
+        default = 60,
+        help="Time limit per job in minutes (passed as -W argument to bsub). Jobs will be killed if not finished in this time."
+    )
+    parser.add_argument(
         "-l",
         "--local",
         action='store_true',
@@ -269,6 +308,7 @@ if __name__ == '__main__':
                     metadata=args.metadata,
                     db_dir=args.db_dir,
                     cores=args.cores,
+                    time_limit=args.time_limit,
                     local=args.local,
                     queue=args.queue,
                     unlock=args.unlock,

@@ -1,6 +1,17 @@
-campylobacter: 'campylobacter'
-escherichia: 'escherichia'
-listeria: 'listeria'
-salmonella: 'salmonella'
-shigella: 'escherichia'
-yersinia: 'yersinia'
+campylobacter: 
+  - 'campylobacter'
+escherichia: 
+  - 'escherichia'
+  - 'shigella'
+listeria: 
+  - 'listeria'
+  - 'listeria_optional'
+salmonella: 
+  - 'salmonella'
+shigella: 
+  - 'escherichia'
+  - 'shigella'
+yersinia: 
+  - 'yersinia'
+clostridioides: 
+  - 'clostridioides'

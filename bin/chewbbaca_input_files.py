@@ -1,8 +1,6 @@
 import argparse
 import base_juno_pipeline.helper_functions
-from os import system
 import pathlib
-import subprocess
 from yaml import safe_load
 
 
@@ -16,9 +14,8 @@ class inputChewBBACA(base_juno_pipeline.helper_functions.JunoHelpers):
                 sample_sheet='config/sample_sheet.yaml',
                 output_dir='output/cgmlst/'):
         '''Constructor'''
-        self.supported_genera = ['campylobacter', 'escherichia', 'listeria', 
-                                'listeria_optional', 'salmonella','shigella', 
-                                'yersinia']
+        with open('files/dictionary_correct_cgmlst_scheme.yaml') as file_:
+            self.supported_genera = safe_load(file_)
         self.sample_sheet = pathlib.Path(sample_sheet)
         assert self.sample_sheet.is_file(), f'The provided sample sheet {str(self.sample_sheet)} does not exist.'
         self.output_dir = pathlib.Path(output_dir)
@@ -29,40 +26,18 @@ class inputChewBBACA(base_juno_pipeline.helper_functions.JunoHelpers):
         with open(self.sample_sheet) as sample_sheet_file:
             self.samples_dict = safe_load(sample_sheet_file)
 
-    def __get_schemes_set(self):
-        print(f'Getting list of all schemes needed to be run in this sample set...\n')
-        self.__read_sample_sheet()
-        schemes_set = set([self.samples_dict[sample]['cgmlst_scheme'] for sample in self.samples_dict])
-        schemes_set = [scheme for scheme in schemes_set if scheme in self.supported_genera]
-        second_schemes = [self.__get_second_scheme_name(scheme_name) for scheme_name in schemes_set]
-        schemes_list = schemes_set + second_schemes
-        schemes_list = [scheme_name for scheme_name in schemes_list if scheme_name is not None]
-        self.schemes_list = schemes_list
-
-
-    def __get_second_scheme_name(self, scheme):
-        '''
-        Some genera run two cgMLST schemes. This function gets the second 
-        scheme name if existing
-        '''
-        if scheme == 'listeria':
-            return 'listeria_optional'
-        elif scheme == 'escherichia':
-            return 'shigella'
-        else:
-            pass
         
     def __enlist_samples_per_scheme(self):
         print(f'Getting list of samples per scheme found...\n')
-        self.__get_schemes_set()
-        cgmlst_scheme_dict = {scheme_name:{'samples': []} for scheme_name in self.schemes_list}
-        for scheme in self.schemes_list:
-            samples_running_scheme = [sample for sample in self.samples_dict if self.samples_dict[sample]['cgmlst_scheme'] == scheme]
-            cgmlst_scheme_dict[scheme]['samples'] = cgmlst_scheme_dict[scheme]['samples'] + samples_running_scheme
-            second_scheme = self.__get_second_scheme_name(scheme)
-            if second_scheme:
-                cgmlst_scheme_dict[second_scheme]['samples'] = cgmlst_scheme_dict[second_scheme]['samples'] + samples_running_scheme
-        return cgmlst_scheme_dict
+        scheme_dict = {}
+        for sample in self.samples_dict:
+            for scheme in self.samples_dict[sample]['cgmlst_scheme']:
+                if scheme is not None:
+                    try:
+                        scheme_dict[scheme].append(self.samples_dict[sample]['assembly'])
+                    except KeyError:
+                        scheme_dict[scheme] = [self.samples_dict[sample]['assembly']]
+        return scheme_dict
 
     def make_file_with_samples_per_scheme(self):
         self.__read_sample_sheet()
@@ -70,10 +45,8 @@ class inputChewBBACA(base_juno_pipeline.helper_functions.JunoHelpers):
         for scheme in cgmlst_scheme_dict:
             scheme_file = self.output_dir.joinpath(scheme + '_samples.txt')
             with open(scheme_file, 'w') as file_:
-                for sample in cgmlst_scheme_dict[scheme]['samples']:
-                    assembly_file = self.samples_dict[sample]['assembly']
+                for assembly_file in cgmlst_scheme_dict[scheme]:
                     file_.write(assembly_file+'\n')
-            cgmlst_scheme_dict[scheme]['scheme_file'] = str(scheme_file)
         print(f'Files with samples per scheme will be written in {self.output_dir} directory!\n')
         self.cgmlst_scheme_dict = cgmlst_scheme_dict
         return cgmlst_scheme_dict

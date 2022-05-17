@@ -85,6 +85,69 @@ python juno_cgmlst.py -i [dir/to/input_directory]
 python juno_cgmlst.py -i my_input_dir -o my_results_dir --db_dir my_db_dir --metadata path/to/my/metadata.csv
 ```
 
+**Note for large datasets:** If your dataset is large (more than 30 samples), t is necessary to give the pipeline extra time to process samples. This means that it needs to run with the `-w` or `--time-limit` argument. The default is 60 (minutes) but for large datasets (more than 30 samples) it should be increased accordingly Example:
+
+```
+python juno_cgmlst.py -i my_large_input_dir -o my_results_dir --db_dir my_db_dir --metadata path/to/my/metadata.csv --time-limit 120
+```
+
+## All parameters
+
+```
+usage: juno_cgmlst.py [-h] -i DIR [-m FILE] [-g FILE] [-o DIR] [-d DIR]
+                      [-c INT] [-q STR] [-w INT] [-l] [-u] [-n]
+                      [--rerunincomplete]
+                      [--snakemake-args [SNAKEMAKE_ARGS [SNAKEMAKE_ARGS ...]]]
+
+Juno-cgMLST pipeline. Automated pipeline for performing cgMLST or wgMLST.
+
+optional arguments:
+  -h, --help            show this help message and exit
+  -i DIR, --input DIR   Relative or absolute path to the input directory. It
+                        must either be the output directory of the Juno-
+                        assembly pipeline or it must contain all the raw reads
+                        (fastq) and assemblies (fasta) files for all samples
+                        to be processed.
+  -m FILE, --metadata FILE
+                        Relative or absolute path to the metadata csv file. If
+                        provided, it must contain at least one column named
+                        'sample' with the name of the sample (same than file
+                        name but removing the suffix _R1.fastq.gz) and a
+                        column called 'genus'. The genus provided will be used
+                        to choose the cgMLST schema(s). If a metadata file is
+                        provided, it will overwrite the --genus argument for
+                        the samples present in the metadata file.
+  -g FILE, --genus FILE
+                        Genus name (any genus in the metadata file will
+                        overwrite this argument). It should be given as two
+                        words (e.g. --genus Salmonella)
+  -o DIR, --output DIR  Relative or absolute path to the output directory. If
+                        non is given, an 'output' directory will be created in
+                        the current directory.
+  -d DIR, --db_dir DIR  Relative or absolute path to the directory that
+                        contains the databases for all the tools used in this
+                        pipeline or where they should be downloaded. Default
+                        is: /mnt/db/juno/cgmlst_db
+  -c INT, --cores INT   Number of cores to use. Default is 300
+  -q STR, --queue STR   Name of the queue that the job will be submitted to if
+                        working on a cluster.
+  -w INT, --time-limit INT
+                        Time limit per job in minutes (passed as -W argument
+                        to bsub). Jobs will be killed if not finished in this
+                        time.
+  -l, --local           Running pipeline locally (instead of in a computer
+                        cluster). Default is running it in a cluster.
+  -u, --unlock          Unlock output directory (passed to snakemake).
+  -n, --dryrun          Dry run printing steps to be taken in the pipeline
+                        without actually running it (passed to snakemake).
+  --rerunincomplete     Re-run jobs if they are marked as incomplete (passed
+                        to snakemake).
+  --snakemake-args [SNAKEMAKE_ARGS [SNAKEMAKE_ARGS ...]]
+                        Extra arguments to be passed to snakemake API (https:/
+                        /snakemake.readthedocs.io/en/stable/api_reference/snak
+                        emake.html).
+```
+
 ## Explanation of the output
 
 * **log:** Log files with output and error files from each Snakemake rule/step that is performed. 
@@ -93,6 +156,7 @@ python juno_cgmlst.py -i my_input_dir -o my_results_dir --db_dir my_db_dir --met
         
 ## Issues  
 
+* ChewBBACA can be very slow so for large datasets it is necessary to give the pipeline extra time to process samples. This means that it needs to run with the `-w` or `--time-limit` argument. The default is 60 (minutes) but for large datasets (more than 30 samples) it should be increased accordingly.
 * All default values have been chosen to work with the RIVM Linux environment, therefore, there might not be applicable to other environments (although they should work if the appropriate arguments/parameters are given).
 * ChewBBACA has some inherent 'issues' that are known:
     - The analysis of separate samples is not completely parallelized. ChewBBACA tries to optimize the analysis but many steps have to be shared between samples. **ChewBBACA blocks the directory with the database** so that **two different analyses cannot be done using the same database at the same time**. This has a reason and that is that if a new allele is found in your dataset, ChewBBACA ensures that a new allele number gets assigned to it and that this one is not concurrently assigned by another running process in the same database. However, this feature can be really problematic for databases where multiple people might be using the pipeline at the same time (as may be the case at the RIVM). You cannot put samples running in parallel (which might be only moderately more efficient anyway because of the shared steps which are long anyway) and more importantly, two people cannot be running an analysis at the same time. This includes automated runs in which samples from different genera, such as _Shigella_  and _Escherichia_ will be processed at the same time and both will be running the same cgMLST scheme but would interfere with each other causing the crash of one of them.   
