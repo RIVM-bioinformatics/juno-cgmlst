@@ -28,12 +28,11 @@ class TestChewbbacaPerGenus(unittest.TestCase):
         genus is created properly for a simple sample
         """
         with open('test_chewbbaca_per_genus/salm_sample_sheet.yaml', 'w') as file_:
-            file_.write('sample1:\n  assembly: sample1.fasta\n  cgmlst_scheme: salmonella\n')
+            file_.write('sample1:\n  assembly: sample1.fasta\n  cgmlst_scheme:\n  - salmonella\n')
         input_chewbbaca = chewbbaca_input_files.inputChewBBACA(sample_sheet='test_chewbbaca_per_genus/salm_sample_sheet.yaml',
                                                         output_dir='test_chewbbaca_per_genus/output')
         input_chewbbaca.make_file_with_samples_per_scheme()
-        expected_output = {'salmonella': {'samples': ['sample1'], 
-                                            'scheme_file': 'test_chewbbaca_per_genus/output/salmonella_samples.txt'}}
+        expected_output = {'salmonella': ['sample1.fasta']}
         actual_output = input_chewbbaca.cgmlst_scheme_dict
         self.assertDictEqual(expected_output, actual_output, actual_output)
 
@@ -45,20 +44,17 @@ class TestChewbbacaPerGenus(unittest.TestCase):
         # No need to test Shigella because all Shigella samples have a 
         # cgmlst_scheme = escherichia in the sample sheet.
         with open('test_chewbbaca_per_genus/twoschemes_sample_sheet.yaml', 'w') as file_:
-            file_.write('sample4:\n  assembly: sample2.fasta\n  cgmlst_scheme: escherichia\n')
-            file_.write('sample3:\n  assembly: sample4.fasta\n  cgmlst_scheme: listeria\n')
+            file_.write('sample2:\n  assembly: sample2.fasta\n  cgmlst_scheme:\n  - escherichia\n  - shigella\n')
+            file_.write('sample4:\n  assembly: sample4.fasta\n  cgmlst_scheme:\n  - listeria\n  - listeria_optional\n')
 
         input_chewbbaca = chewbbaca_input_files.inputChewBBACA(sample_sheet='test_chewbbaca_per_genus/twoschemes_sample_sheet.yaml',
                                                         output_dir='test_chewbbaca_per_genus/output')
         input_chewbbaca.make_file_with_samples_per_scheme()
-        expected_output = {'listeria': {'samples': ['sample3'], 
-                                        'scheme_file': 'test_chewbbaca_per_genus/output/listeria_samples.txt'},
-                            'listeria_optional': {'samples': ['sample3'], 
-                                                'scheme_file': 'test_chewbbaca_per_genus/output/listeria_optional_samples.txt'},
-                            'escherichia': {'samples': ['sample4'], 
-                                        'scheme_file': 'test_chewbbaca_per_genus/output/escherichia_samples.txt'},
-                            'shigella': {'samples': ['sample4'], 
-                                        'scheme_file': 'test_chewbbaca_per_genus/output/shigella_samples.txt'}}
+        expected_output = {'listeria': ['sample4.fasta'],
+                            'listeria_optional': ['sample4.fasta'],
+                            'escherichia': ['sample2.fasta'], 
+                            'shigella': ['sample2.fasta'], 
+                            }
         actual_output = input_chewbbaca.cgmlst_scheme_dict
         self.assertDictEqual(expected_output, actual_output, actual_output)
 
@@ -69,25 +65,21 @@ class TestChewbbacaPerGenus(unittest.TestCase):
         # No need to test Shigella because all Shigella samples have a 
         # cgmlst_scheme = escherichia in the sample sheet.
         with open('test_chewbbaca_per_genus/multi_sample_sheet.yaml', 'w') as file_:
-            file_.write('sample1:\n  assembly: sample1.fasta\n  cgmlst_scheme: salmonella\n')
-            file_.write('sample2:\n  assembly: sample2.fasta\n  cgmlst_scheme: salmonella\n')
-            file_.write('sample3:\n  assembly: sample3.fasta\n  cgmlst_scheme: listeria\n')
-            file_.write('sample4:\n  assembly: sample4.fasta\n  cgmlst_scheme: escherichia\n')
-            file_.write('sample5:\n  assembly: sample5.fasta\n  cgmlst_scheme: escherichia\n')
+            file_.write('sample1:\n  assembly: sample1.fasta\n  cgmlst_scheme:\n  - salmonella\n')
+            file_.write('sample2:\n  assembly: sample2.fasta\n  cgmlst_scheme:\n  - salmonella\n')
+            file_.write('sample3:\n  assembly: sample3.fasta\n  cgmlst_scheme:\n  - listeria\n  - listeria_optional\n')
+            file_.write('sample4:\n  assembly: sample4.fasta\n  cgmlst_scheme:\n  - escherichia\n  - shigella\n')
+            file_.write('sample5:\n  assembly: sample5.fasta\n  cgmlst_scheme:\n  - escherichia\n  - shigella\n')
 
         input_chewbbaca = chewbbaca_input_files.inputChewBBACA(sample_sheet='test_chewbbaca_per_genus/multi_sample_sheet.yaml',
                                                         output_dir='test_chewbbaca_per_genus/output')
         input_chewbbaca.make_file_with_samples_per_scheme()
-        expected_output = {'escherichia': {'samples': ['sample4', 'sample5'], 
-                                            'scheme_file': 'test_chewbbaca_per_genus/output/escherichia_samples.txt'},
-                            'listeria': {'samples': ['sample3'], 
-                                        'scheme_file': 'test_chewbbaca_per_genus/output/listeria_samples.txt'},
-                            'listeria_optional': {'samples': ['sample3'], 
-                                                'scheme_file': 'test_chewbbaca_per_genus/output/listeria_optional_samples.txt'},
-                            'salmonella': {'samples': ['sample1', 'sample2'], 
-                                            'scheme_file': 'test_chewbbaca_per_genus/output/salmonella_samples.txt'},
-                            'shigella': {'samples': ['sample4', 'sample5'], 
-                                        'scheme_file': 'test_chewbbaca_per_genus/output/shigella_samples.txt'}}
+        expected_output = {'escherichia': ['sample4.fasta', 'sample5.fasta'], 
+                            'listeria': ['sample3.fasta'], 
+                            'listeria_optional':['sample3.fasta'], 
+                            'salmonella':['sample1.fasta', 'sample2.fasta'], 
+                            'shigella': ['sample4.fasta', 'sample5.fasta']
+                            }
         actual_output = input_chewbbaca.cgmlst_scheme_dict
         self.assertDictEqual(expected_output, actual_output, actual_output)
 
@@ -99,28 +91,25 @@ class TestChewbbacaPerGenus(unittest.TestCase):
         # No need to test Shigella because all Shigella samples have a 
         # cgmlst_scheme = escherichia in the sample sheet.
         with open('test_chewbbaca_per_genus/unsupported_sample_sheet.yaml', 'w') as file_:
-            file_.write('sample1:\n  assembly: sample1.fasta\n  cgmlst_scheme: salmonella\n')
-            file_.write('sample2:\n  assembly: sample2.fasta\n  cgmlst_scheme: salmonella\n')
-            file_.write('sample3:\n  assembly: sample3.fasta\n  cgmlst_scheme: listeria\n')
-            file_.write('sample4:\n  assembly: sample4.fasta\n  cgmlst_scheme: escherichia\n')
-            file_.write('sample5:\n  assembly: sample5.fasta\n  cgmlst_scheme: escherichia\n')
-            file_.write('sample6:\n  assembly: sample6.fasta\n  cgmlst_scheme: fake_genus\n')
+            file_.write('sample1:\n  assembly: sample1.fasta\n  cgmlst_scheme:\n  - salmonella\n')
+            file_.write('sample2:\n  assembly: sample2.fasta\n  cgmlst_scheme:\n  - salmonella\n')
+            file_.write('sample3:\n  assembly: sample3.fasta\n  cgmlst_scheme:\n  - listeria\n  - listeria_optional\n')
+            file_.write('sample4:\n  assembly: sample4.fasta\n  cgmlst_scheme:\n  - escherichia\n  - shigella\n')
+            file_.write('sample5:\n  assembly: sample5.fasta\n  cgmlst_scheme:\n  - escherichia\n  - shigella\n')
+            file_.write('sample6:\n  assembly: sample6.fasta\n  cgmlst_scheme:\n  - null\n')
         # TODO: This might change if we improve identification and then Shigella only needs to run one schema
 
         input_chewbbaca = chewbbaca_input_files.inputChewBBACA(sample_sheet='test_chewbbaca_per_genus/unsupported_sample_sheet.yaml',
                                                         output_dir='test_chewbbaca_per_genus/output')
         input_chewbbaca.make_file_with_samples_per_scheme()
-        expected_output = {'escherichia': {'samples': ['sample4', 'sample5'], 
-                                            'scheme_file': 'test_chewbbaca_per_genus/output/escherichia_samples.txt'},
-                            'listeria': {'samples': ['sample3'], 
-                                        'scheme_file': 'test_chewbbaca_per_genus/output/listeria_samples.txt'},
-                            'listeria_optional': {'samples': ['sample3'], 
-                                                'scheme_file': 'test_chewbbaca_per_genus/output/listeria_optional_samples.txt'},
-                            'salmonella': {'samples': ['sample1', 'sample2'], 
-                                            'scheme_file': 'test_chewbbaca_per_genus/output/salmonella_samples.txt'},
-                            'shigella': {'samples': ['sample4', 'sample5'], 
-                                        'scheme_file': 'test_chewbbaca_per_genus/output/shigella_samples.txt'}}
+        expected_output = {'escherichia': ['sample4.fasta', 'sample5.fasta'], 
+                            'listeria': ['sample3.fasta'], 
+                            'listeria_optional': ['sample3.fasta'], 
+                            'salmonella': ['sample1.fasta', 'sample2.fasta'], 
+                            'shigella': ['sample4.fasta', 'sample5.fasta'], 
+                            }
         actual_output = input_chewbbaca.cgmlst_scheme_dict
+        print(actual_output)
         self.assertDictEqual(expected_output, actual_output, actual_output)
 
 

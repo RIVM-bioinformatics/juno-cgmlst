@@ -55,53 +55,7 @@ conda env install -f envs/master_env.yaml
 
 ### Optional parameters
 
-* `-g --genus`  for ALL samples (it assumes all of them are the same species). It should be ONE word (e.g Salmonella or Escherichia). If a metadata file is also provided, the `-g` argument will take precedence and be used instead. The genus is used to choose the scheme for cgMLST.
-* `-m --metadata` Relative or absolute path to a csv file containing at least one column with the 'sample' name (name of the file but removing [_S##]_R1.fastq.gz) and a column called 'genus' (Note that the sample names are written in small letters, not a single capital letter). If none is given and the input directory contains a file called '<input_dir>/identify_species/top1_species_multireport.csv' (as obtained with the Juno-assembly pipeline) this will be used as metadata. If a `--genus` is provided for a sample, it will overwrite the metadata when choosing the scheme for cgMLST. Example metadata file:
-
-
-| __sample__ | __genus__ |
-| :---: | :--- |
-| sample1 | salmonella |
-
-*Note:* The fastq files corresponding to this sample would probably be something like sample1_S1_R1_0001.fastq.gz and sample2_S1_R1_0001.fastq.gz and the fasta file sample1.fasta. Also note that the column titles of the metadata.csv file are all in lower case.
-
-* ```-o --output``` Directory (if not existing it will be created) where the output of the pipeline will be collected. The default behavior is to create a folder called 'output' within the pipeline directory. 
-* ```-d --db_dir``` Directory (if not existing it will be created) where the databases used by this pipeline will be downloaded or where they are expected to be present. Default is '/mnt/db/juno/cgmlst' (internal RIVM path to the databases of the Juno pipelines). It is advisable to provide your own path if you are not working inside the RIVM Linux environment.
-* ```-c --cores```  Maximum number of cores to be used to run the pipeline. Defaults to 300 (it assumes you work in an HPC cluster).
-* ```-l --local```  If this flag is present, the pipeline will be run locally (not attempting to send the jobs to a cluster). Keep in mind that if you use this flag, you also need to adjust the number of cores (for instance, to 2) to avoid crashes. The default is to assume that you are working on a cluster because the pipeline was developed in an environment where it is the case.
-* ```-q --queue```  If you are running the pipeline in a cluster, you need to provide the name of the queue. It defaults to 'bio' (default queue at the RIVM). 
-* ```-n --dryrun```, ```-u --unlock``` and ```--rerunincomplete``` are all parameters passed to Snakemake. If you want the explanation of these parameters, please refer to the [Snakemake documentation](https://snakemake.readthedocs.io/en/stable/).
-* `--update` If this flag is present, the databases will be re-downloaded even if they are present already.
-
-### The base command to run this program. 
-
 ```
-python juno_cgmlst.py -i [dir/to/input_directory] 
-```
-
-### An example on how to run the pipeline.
-
-```
-python juno_cgmlst.py -i my_input_dir -o my_results_dir --db_dir my_db_dir --metadata path/to/my/metadata.csv
-```
-
-**Note for large datasets:** If your dataset is large (more than 30 samples), t is necessary to give the pipeline extra time to process samples. This means that it needs to run with the `-w` or `--time-limit` argument. The default is 60 (minutes) but for large datasets (more than 30 samples) it should be increased accordingly Example:
-
-```
-python juno_cgmlst.py -i my_large_input_dir -o my_results_dir --db_dir my_db_dir --metadata path/to/my/metadata.csv --time-limit 120
-```
-
-## All parameters
-
-```
-usage: juno_cgmlst.py [-h] -i DIR [-m FILE] [-g FILE] [-o DIR] [-d DIR]
-                      [-c INT] [-q STR] [-w INT] [-l] [-u] [-n]
-                      [--rerunincomplete]
-                      [--snakemake-args [SNAKEMAKE_ARGS [SNAKEMAKE_ARGS ...]]]
-
-Juno-cgMLST pipeline. Automated pipeline for performing cgMLST or wgMLST.
-
-optional arguments:
   -h, --help            show this help message and exit
   -i DIR, --input DIR   Relative or absolute path to the input directory. It
                         must either be the output directory of the Juno-
@@ -146,6 +100,32 @@ optional arguments:
                         Extra arguments to be passed to snakemake API (https:/
                         /snakemake.readthedocs.io/en/stable/api_reference/snak
                         emake.html).
+```
+
+Example metadata file:
+
+| __sample__ | __genus__ |
+| :---: | :--- |
+| sample1 | salmonella |
+
+*Note:* The fastq files corresponding to this sample would probably be something like sample1_S1_R1_0001.fastq.gz and sample2_S1_R1_0001.fastq.gz and the fasta file sample1.fasta. Also note that the column titles of the metadata.csv file are all in lower case.
+
+### The base command to run this program. 
+
+```
+python juno_cgmlst.py -i [dir/to/input_directory] 
+```
+
+### An example on how to run the pipeline.
+
+```
+python juno_cgmlst.py -i my_input_dir -o my_results_dir --db_dir my_db_dir --metadata path/to/my/metadata.csv
+```
+
+**Note for large datasets:** If your dataset is large (more than 30 samples), t is necessary to give the pipeline extra time to process samples. This means that it needs to run with the `-w` or `--time-limit` argument. The default is 60 (minutes) but for large datasets (more than 30 samples) it should be increased accordingly Example:
+
+```
+python juno_cgmlst.py -i my_large_input_dir -o my_results_dir --db_dir my_db_dir --metadata path/to/my/metadata.csv --time-limit 120
 ```
 
 ## Explanation of the output

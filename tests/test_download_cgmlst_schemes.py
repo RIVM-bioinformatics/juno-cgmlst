@@ -64,12 +64,6 @@ class TestDownloadcgMLSTSchemes(unittest.TestCase):
                 'locus_count': 3002,
                 'scheme_description': None
             },
-            'escherichia': {
-                'source': 'seqsphere',
-                'url': 'https://www.cgmlst.org/ncs/schema/8896773/locus/',
-                'locus_count': 3152,
-                'scheme_description': None
-            },
             'shigella': {
                 'source': 'enterobase',
                 'url': 'http://enterobase.warwick.ac.uk/schemes/Escherichia.cgMLSTv1/',
@@ -80,73 +74,10 @@ class TestDownloadcgMLSTSchemes(unittest.TestCase):
         self.assertEqual(len(cgMLSTschemes_result.schemes), len(expected_result))
         self.assertTrue('salmonella' in cgMLSTschemes_result.schemes)
         self.assertTrue('shigella' in cgMLSTschemes_result.schemes)
-        self.assertTrue('escherichia' in cgMLSTschemes_result.schemes)
         self.assertEqual(cgMLSTschemes_result.schemes, expected_result)
         dir_with_downloaded_scheme = pathlib.Path('test_output', 'salmonella')
         self.assertFalse(dir_with_downloaded_scheme.is_dir())
         dir_with_downloaded_scheme = pathlib.Path('test_output', 'shigella')
-        self.assertFalse(dir_with_downloaded_scheme.is_dir())
-        dir_with_downloaded_scheme = pathlib.Path('test_output', 'escherichia')
-        self.assertFalse(dir_with_downloaded_scheme.is_dir())
-
-    def test_escherichia_cgMLSTschemes(self):
-        """Escherichia should download 2 schemes: the default seqsphere and 
-        the optional enterobase one (shared with shigella)
-        """
-
-        cgMLSTschemes_result = download_cgmlst_scheme.cgMLSTSchemes(
-            ['escherichia'], output_dir='test_output',
-            threads=2, download_loci=False
-        )
-        expected_result = {
-            'escherichia': {
-                'source': 'seqsphere',
-                'url': 'https://www.cgmlst.org/ncs/schema/8896773/locus/',
-                'locus_count': 3152,
-                'scheme_description': None
-            },
-            'shigella': {
-                'source': 'enterobase',
-                'url': 'http://enterobase.warwick.ac.uk/schemes/Escherichia.cgMLSTv1/',
-                'locus_count': 2513,
-                'scheme_description': None
-            }
-        }
-        self.assertEqual(len(cgMLSTschemes_result.schemes), 2)
-        self.assertTrue('escherichia' in cgMLSTschemes_result.schemes)
-        self.assertTrue('shigella' in cgMLSTschemes_result.schemes)
-        self.assertEqual(cgMLSTschemes_result.schemes, expected_result)
-        dir_with_downloaded_scheme = pathlib.Path('test_output', 'escherichia')
-        self.assertFalse(dir_with_downloaded_scheme.is_dir())
-        dir_with_downloaded_scheme = pathlib.Path('test_output', 'shigella')
-        self.assertFalse(dir_with_downloaded_scheme.is_dir())
-
-    def test_listeria_cgMLSTschemes(self):
-        """Listeria should download 2 schemes: the default seqsphere and 
-        the optional from BigsDB Pasteur.
-        """
-
-        cgMLSTschemes_result = download_cgmlst_scheme.cgMLSTSchemes(['listeria'],
-                                                        output_dir='test_output',
-                                                        threads=2,
-                                                        download_loci=False)
-        expected_result = {'listeria': \
-                            {'source': 'seqsphere',
-                            'url': 'https://www.cgmlst.org/ncs/schema/690488/locus/',
-                            'locus_count': 1701,
-                            'scheme_description': None},
-                        'listeria_optional': \
-                            {'source': 'bigsdb_pasteur',
-                            'url': 'https://bigsdb.pasteur.fr/api/db/pubmlst_listeria_seqdef/schemes/3',
-                            'locus_count': 1748,
-                            'scheme_description': 'cgMLST1748'}}
-        self.assertEqual(len(cgMLSTschemes_result.schemes), 2)
-        self.assertTrue('listeria' in cgMLSTschemes_result.schemes)
-        self.assertTrue('listeria_optional' in cgMLSTschemes_result.schemes)
-        self.assertEqual(cgMLSTschemes_result.schemes, expected_result)
-        dir_with_downloaded_scheme = pathlib.Path('test_output', 'listeria')
-        self.assertFalse(dir_with_downloaded_scheme.is_dir())
-        dir_with_downloaded_scheme = pathlib.Path('test_output', 'listeria_optional')
         self.assertFalse(dir_with_downloaded_scheme.is_dir())
 
     def test_warning_when_some_species_not_supported_for_cgMLST(self):
@@ -219,20 +150,14 @@ class TestDownloadcgMLSTSchemes(unittest.TestCase):
                                                         output_dir='test_output',
                                                         threads=1,
                                                         download_loci=True)
-        expected_result = {'test_pubmlst': \
-                            {'source': 'pubmlst',
-                            'url': 'https://rest.pubmlst.org/db/pubmlst_salmonella_seqdef/schemes/2',
-                            'locus_count': 7,
-                            'scheme_description': 'MLST'}}
         self.assertTrue(len(cgMLSTschemes_result.schemes) == 1)
         self.assertTrue('test_pubmlst' in cgMLSTschemes_result.schemes)
-        self.assertEqual(cgMLSTschemes_result.schemes, expected_result)
         dir_with_downloaded_scheme = pathlib.Path('test_output', 'test_pubmlst')
         self.assertTrue(dir_with_downloaded_scheme.is_dir())
         files_in_downloaded_scheme = os.listdir(dir_with_downloaded_scheme)
         fasta_files_in_downloaded_scheme = [file_ for file_ in files_in_downloaded_scheme if str(file_).endswith('.fasta')]
         len(fasta_files_in_downloaded_scheme)
-        self.assertEqual(len(fasta_files_in_downloaded_scheme), expected_result['test_pubmlst']['locus_count'])
+        self.assertEqual(len(fasta_files_in_downloaded_scheme), 7)
 
     def test_bigsdb_pasteur_scheme_is_properly_downloaded(self):
         """A test subfolder should be created and a fasta files per locus
@@ -243,20 +168,14 @@ class TestDownloadcgMLSTSchemes(unittest.TestCase):
                                                         output_dir='test_output',
                                                         threads=1,
                                                         download_loci=True)
-        expected_result = {'test_bigsdb_pasteur': \
-                            {'source': 'bigsdb_pasteur',
-                            'url': 'https://bigsdb.pasteur.fr/api/db/pubmlst_listeria_seqdef/schemes/2',
-                            'locus_count': 7,
-                            'scheme_description': 'MLST'}}
         self.assertTrue(len(cgMLSTschemes_result.schemes) == 1)
         self.assertTrue('test_bigsdb_pasteur' in cgMLSTschemes_result.schemes)
-        self.assertEqual(cgMLSTschemes_result.schemes, expected_result)
         dir_with_downloaded_scheme = pathlib.Path('test_output', 'test_bigsdb_pasteur')
         self.assertTrue(dir_with_downloaded_scheme.is_dir())
         files_in_downloaded_scheme = os.listdir(dir_with_downloaded_scheme)
         fasta_files_in_downloaded_scheme = [file_ for file_ in files_in_downloaded_scheme if str(file_).endswith('.fasta')]
         len(fasta_files_in_downloaded_scheme)
-        self.assertEqual(len(fasta_files_in_downloaded_scheme), expected_result['test_bigsdb_pasteur']['locus_count'])
+        self.assertEqual(len(fasta_files_in_downloaded_scheme), 7)
 
     def test_enterobase_scheme_is_properly_downloaded(self):
         """A test subfolder should be created and a fasta files per locus
@@ -267,20 +186,14 @@ class TestDownloadcgMLSTSchemes(unittest.TestCase):
                                                         output_dir='test_output',
                                                         threads=1,
                                                         download_loci=True)
-        expected_result = {'test_enterobase': \
-                            {'source': 'enterobase',
-                            'url': 'https://enterobase.warwick.ac.uk/schemes/Yersinia.Achtman7GeneMLST/',
-                            'locus_count': 7,
-                            'scheme_description': None}}
         self.assertTrue(len(cgMLSTschemes_result.schemes) == 1)
         self.assertTrue('test_enterobase' in cgMLSTschemes_result.schemes)
-        self.assertEqual(cgMLSTschemes_result.schemes, expected_result)
         dir_with_downloaded_scheme = pathlib.Path('test_output', 'test_enterobase')
         self.assertTrue(dir_with_downloaded_scheme.is_dir())
         files_in_downloaded_scheme = os.listdir(dir_with_downloaded_scheme)
         fasta_files_in_downloaded_scheme = [file_ for file_ in files_in_downloaded_scheme if str(file_).endswith('.fasta')]
         len(fasta_files_in_downloaded_scheme)
-        self.assertEqual(len(fasta_files_in_downloaded_scheme), expected_result['test_enterobase']['locus_count'])
+        self.assertEqual(len(fasta_files_in_downloaded_scheme), 7)
 
 
 
