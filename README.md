@@ -40,7 +40,7 @@ Alternatively, you can download it manually as a zip file (you will need to unzi
 
 ```
 cd Juno_cgmlst
-conda env install -f envs/master_env.yaml
+conda env update -f envs/master_env.yaml
 ```
 
 ## Parameters & Usage
