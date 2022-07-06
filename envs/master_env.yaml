@@ -1,10 +1,7 @@
 name: juno_cgmlst
 channels:
-  - anaconda
   - bioconda
-  - biocore
   - conda-forge
-  - defaults
 dependencies:
   - snakemake==7.6.1
   - mamba
@@ -12,9 +9,9 @@ dependencies:
   - pip==19.2.3
   - pandas==1.3.2
   - biopython=1.74
-  - bs4
+  - bs4=4.11
+  - networkx=2.7.1
+  - pygraphviz=1.7
   - pip:
     - numpy
     - "--editable=git+https://github.com/RIVM-bioinformatics/base_juno_pipeline.git@v0.2.7#egg=base_juno"
-
-

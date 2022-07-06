@@ -3,7 +3,7 @@ output/
 __pycache__/
 envs/src/
 .pytest_cache/
-
+schemes/
 
 config/user_parameters.yaml
 config/sample_sheet.yaml
