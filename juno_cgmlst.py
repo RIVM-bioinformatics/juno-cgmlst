@@ -10,6 +10,7 @@ Date: 06-05-2022
 
 # Dependencies
 from base_juno_pipeline import *
+from bin.version import __version__
 import argparse
 import pathlib
 import subprocess
@@ -300,6 +301,13 @@ if __name__ == '__main__':
         default={},
         action=helper_functions.SnakemakeKwargsAction,
         help="Extra arguments to be passed to snakemake API (https://snakemake.readthedocs.io/en/stable/api_reference/snakemake.html)."
+    )
+    parser.add_argument(
+        "--version",
+        "-v",
+        action="version",
+        version=__version__,
+        help="Show Juno_cgmlst version number and exit",
     )
     args = parser.parse_args()
     JunoCgmlstRun(input_dir=args.input, 

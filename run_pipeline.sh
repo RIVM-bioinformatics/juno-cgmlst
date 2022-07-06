@@ -72,8 +72,8 @@ set -euo pipefail
 
 # echo -e "\nCopying the cgMLST schema from $GENUS_ALL..."
 DB_DIR="schemes"
-# mkdir -p "$DB_DIR/prepared_schemes"
-# cp -r "/mnt/db/juno/cgmlst/prepared_schemes/$GENUS_ALL" "$DB_DIR/prepared_schemes"
+mkdir -p "$DB_DIR/prepared_schemes"
+cp -r "/mnt/db/juno/cgmlst/prepared_schemes/$GENUS_ALL" "$DB_DIR/prepared_schemes"
 
 #----------------------------------------------#
 # Run the pipeline

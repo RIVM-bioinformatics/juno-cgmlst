@@ -100,6 +100,8 @@ conda env update -f envs/master_env.yaml
                         Extra arguments to be passed to snakemake API (https:/
                         /snakemake.readthedocs.io/en/stable/api_reference/snak
                         emake.html).
+  --version, -v         Show Jonu_cgmlst version number and exit
+
 ```
 
 Example metadata file:
