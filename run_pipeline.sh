@@ -58,10 +58,10 @@ echo -e "\nUpdating necessary environments to run the pipeline..."
 # are set or not
 set +euo pipefail 
 
-# conda env update -f "${PATH_MAMBA_YAML}"
-# source activate "${MAMBA_NAME}"
+conda env update -f "${PATH_MAMBA_YAML}"
+source activate "${MAMBA_NAME}"
 
-# mamba env update -f "${PATH_MASTER_YAML}"
+mamba env update -f "${PATH_MASTER_YAML}"
 
 source activate "${MASTER_NAME}"
 
