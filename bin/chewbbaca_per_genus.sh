@@ -19,9 +19,10 @@ rm -rf "results_*"
 
 if [ ! -f "${prepared_scheme}_summary_stats.txt" ]; then
     echo "\nPreparing scheme for running it with ChewBBACA...\n"
-    chewBBACA.py PrepExternalSchema -i "${downloaded_scheme}" \
-        --output-directory "${prepared_scheme}" \
-        --cpu ${threads}
+    chewBBACA.py PrepExternalSchema -i "$downloaded_scheme" \
+        --output-directory "$prepared_scheme" \
+        --cpu $threads \
+        --ptf "$prodigal_training_file"
     echo "Prepared scheme can be found at ${prepared_scheme}.\n"
 fi
 
