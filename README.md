@@ -81,7 +81,7 @@ conda env update -f envs/master_env.yaml
   -d DIR, --db_dir DIR  Relative or absolute path to the directory that
                         contains the databases for all the tools used in this
                         pipeline or where they should be downloaded. Default
-                        is: /mnt/db/juno/cgmlst_db
+                        is: /mnt/db/juno/cgmlst
   -c INT, --cores INT   Number of cores to use. Default is 300
   -q STR, --queue STR   Name of the queue that the job will be submitted to if
                         working on a cluster.
