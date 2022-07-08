@@ -26,17 +26,23 @@ fi
 
 case $PROJECT_NAME in
 
-  dsshig|svshig|svstec|vdl_ecoli|vdl_stec)
-    GENUS_ALL="escherichia"
+  svstec)
+    GENUS_ALL="escherichia shigella stec"
     ;;
-  salm|svsalent|svsaltyp|vdl_salm)
+  svshig)
+    GENUS_ALL="escherichia shigella"
+    ;;
+  salm)
     GENUS_ALL="salmonella"
     ;;
-  campy|vdl_campy)
+  campy)
     GENUS_ALL="campylobacter"
     ;;
-  adhoc|gasadhoc|bacid|rogas|svgasuit|svlismon|vdl_list)
-    GENUS_ALL="other"
+  svlismon)
+    GENUS_ALL="listeria listeria_optional"
+    ;;
+  yers)
+    GENUS_ALL="yersinia"
     ;;
   *)
     GENUS_ALL="other"
@@ -67,32 +73,35 @@ source activate "${MASTER_NAME}"
 
 set -euo pipefail
 
+
+if [ ! -z ${irods_runsheet_sys__runsheet__lsf_queue} ]; then
+    QUEUE="${irods_runsheet_sys__runsheet__lsf_queue}"
+else
+    QUEUE="bio"
+fi
+
+for GENUS in $GENUS_ALL
+do
 #----------------------------------------------#
 # Copying database directory if it exists
 
-# echo -e "\nCopying the cgMLST schema from $GENUS_ALL..."
+echo -e "\nCopying the cgMLST schema from $GENUS..."
 DB_DIR="schemes"
 mkdir -p "$DB_DIR/prepared_schemes"
-cp -r "/mnt/db/juno/cgmlst/prepared_schemes/$GENUS_ALL" "$DB_DIR/prepared_schemes"
+cp -r "/mnt/db/juno/cgmlst/prepared_schemes/$GENUS" "$DB_DIR/prepared_schemes/$GENUS"
 
 #----------------------------------------------#
 # Run the pipeline
 echo -e "\nRun pipeline..."
 
-# if [ ! -z ${irods_runsheet_sys__runsheet__lsf_queue} ]; then
-#     QUEUE="${irods_runsheet_sys__runsheet__lsf_queue}"
-# else
-#     QUEUE="bio"
-# fi
-
 python juno_cgmlst.py \
-    -i "${input_dir}" \
-    -o "${output_dir}" \
-    -g "${GENUS_ALL}" \
+    --queue "$QUEUE" \
+    -i "$input_dir" \
+    -o "$output_dir" \
+    -g "$GENUS" \
     -d "$DB_DIR"
-    # --queue "${QUEUE}" \
-
-result=$?
+result=$((result > $? ? result : $?)) # Maximum of previous return value and result https://unix.stackexchange.com/a/186703
+done
 
 #----------------------------------------------#
 # Propagate metadata

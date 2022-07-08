@@ -5,7 +5,7 @@ Open to suggestions.
 [HE978252](https://www.ncbi.nlm.nih.gov/nuccore/HE978252)
 strain: NCTC 11168-BN148 
 
-**escherichia**
+**escherichia/stec/shigella**
 [NC_002695.1](https://www.ncbi.nlm.nih.gov/nuccore/NC_002695.1)
 strain: Sakai
 
