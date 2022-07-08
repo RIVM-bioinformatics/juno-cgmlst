@@ -12,7 +12,7 @@ genus="$5"
 downloaded_scheme="${db_dir}/downloaded_schemes/${genus}"
 prepared_scheme="${db_dir}/prepared_schemes/${genus}/scheme"
 script_path="$( cd -- "$(dirname "$0")" >/dev/null 2>&1 ; pwd -P )"
-prodigal_training_file="$script_path/../files/prodigal_training_files/${genus}"
+prodigal_training_file="$script_path/../files/prodigal_training_files/${genus}.trn"
 
 echo "Deleting any previous results from old ChewBBACA runs if existing in ${output_dir}...\n"
 rm -rf "results_*"  
