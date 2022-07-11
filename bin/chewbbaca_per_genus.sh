@@ -10,15 +10,15 @@ genus="$5"
 
 # Make new variables
 downloaded_scheme="${db_dir}/downloaded_schemes/${genus}"
-prepared_scheme="${db_dir}/prepared_schemes/${genus}/scheme"
+prepared_scheme="${db_dir}/prepared_schemes/${genus}"
 script_path="$( cd -- "$(dirname "$0")" >/dev/null 2>&1 ; pwd -P )"
-prodigal_training_file="$script_path/../files/prodigal_training_files/${genus}.trn"
+prodigal_training_file=$(realpath "$script_path/../files/prodigal_training_files/${genus}.trn")
 
 echo "Deleting any previous results from old ChewBBACA runs if existing in ${output_dir}...\n"
 rm -rf "results_*"  
 
-if [ ! -f "${prepared_scheme}_summary_stats.txt" ]; then
-    echo "\nPreparing scheme for running it with ChewBBACA...\n"
+if [ ! -f "$db_dir/prepared_schemes/${genus}_summary_stats.txt" ]; then
+    echo "Preparing scheme for running it with ChewBBACA..."
     chewBBACA.py PrepExternalSchema -i "$downloaded_scheme" \
         --output-directory "$prepared_scheme" \
         --cpu $threads \
@@ -35,7 +35,7 @@ chewBBACA.py AlleleCall --cpu ${threads} \
                 -i "${input_files}" \
                 -g "${prepared_scheme}" \
                 -o "." \
-                --ptf "$prodigal_training_file"
+                --ptf "$prodigal_training_file" \
                 --fr
 
 find "." -type f -name "results_alleles.tsv" -exec cp {} "." \;

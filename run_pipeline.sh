@@ -24,30 +24,6 @@ fi
 #   input_fastq="${input_dir}/clean_fastq"
 # fi
 
-case $PROJECT_NAME in
-
-  svstec)
-    GENUS_ALL="escherichia shigella stec"
-    ;;
-  svshig)
-    GENUS_ALL="escherichia shigella"
-    ;;
-  salm)
-    GENUS_ALL="salmonella"
-    ;;
-  campy)
-    GENUS_ALL="campylobacter"
-    ;;
-  svlismon)
-    GENUS_ALL="listeria listeria_optional"
-    ;;
-  yers)
-    GENUS_ALL="yersinia"
-    ;;
-  *)
-    GENUS_ALL="other"
-    ;;
-esac
 
 
 #----------------------------------------------#
@@ -80,15 +56,46 @@ else
     QUEUE="bio"
 fi
 
-for GENUS in $GENUS_ALL
-do
+case $PROJECT_NAME in
+  svstec)
+    GENUS_ALL="escherichia shigella stec"
+    GENUS="stec"
+    ;;
+  svshig)
+    GENUS_ALL="escherichia shigella"
+    GENUS="shigella"
+    ;;
+  salm)
+    GENUS_ALL="salmonella"
+    GENUS="salmonella"
+    ;;
+  campy)
+    GENUS_ALL="campylobacter"
+    GENUS="campylobacter"
+    ;;
+  svlismon)
+    GENUS_ALL="listeria listeria_optional"
+    GENUS="listeria"
+    ;;
+  yers)
+    GENUS_ALL="yersinia"
+    GENUS="yersinia"
+    ;;
+  *)
+    GENUS_ALL="other"
+    ;;
+esac
+
 #----------------------------------------------#
 # Copying database directory if it exists
-
-echo -e "\nCopying the cgMLST schema from $GENUS..."
 DB_DIR="schemes"
-mkdir -p "$DB_DIR/prepared_schemes"
-cp -r "/mnt/db/juno/cgmlst/prepared_schemes/$GENUS" "$DB_DIR/prepared_schemes/$GENUS"
+for G in $GENUS_ALL
+do
+  echo -e "\nCopying the cgMLST schema from /mnt/db/juno/cgmlst/prepared_schemes/$G..."
+  mkdir -p "$DB_DIR/prepared_schemes"
+  cp -r --no-preserve=mode,ownership "/mnt/db/juno/cgmlst/prepared_schemes/$G" "$DB_DIR/prepared_schemes/$G"
+  cp --no-preserve=mode,ownership /mnt/db/juno/cgmlst/prepared_schemes/${G}_{sum,inv}*.txt "$DB_DIR/prepared_schemes/"
+done
 
 #----------------------------------------------#
 # Run the pipeline
@@ -100,8 +107,8 @@ python juno_cgmlst.py \
     -o "$output_dir" \
     -g "$GENUS" \
     -d "$DB_DIR"
-result=$((result > $? ? result : $?)) # Maximum of previous return value and result https://unix.stackexchange.com/a/186703
-done
+
+result=$?
 
 #----------------------------------------------#
 # Propagate metadata
