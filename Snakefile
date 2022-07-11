@@ -42,7 +42,7 @@ localrules:
 rule all:
     input:
         expand(OUT + '/cgmlst/{scheme}/results_alleles.tsv', scheme=SCHEMES),
-        expand(OUT + '/cgmlst/{scheme}/hashed_results_alleles.csv', scheme=SCHEMES)
+        # expand(OUT + '/cgmlst/{scheme}/hashed_results_alleles.csv', scheme=SCHEMES)
 
 #@################################################################################
 #@####                              Processes                                #####

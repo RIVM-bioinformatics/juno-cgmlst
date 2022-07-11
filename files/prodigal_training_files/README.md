@@ -9,7 +9,7 @@ strain: NCTC 11168-BN148
 [NC_002695.1](https://www.ncbi.nlm.nih.gov/nuccore/NC_002695.1)
 strain: Sakai
 
-**listeria**
+**listeria/listeria_optional**
 ?
 
 **salmonella**
