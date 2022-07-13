@@ -244,6 +244,8 @@ class CgmlstResult:
         allele_hash = list(set(allele_hash))
         if len(allele_hash) > 1:
             f"The id number {id_number} did not deliver a unique hash: {allele_hash}"
+        elif len(allele_hash) < 1:
+            raise ValueError(f"The id number {id_number} did not deliver a hash")
         return allele_hash[0]
 
     def __gen_hash_per_id_num(self, hash_id_tbl, id_numbers, fasta_file):
