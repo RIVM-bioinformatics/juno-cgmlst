@@ -4,6 +4,8 @@ __pycache__/
 envs/src/
 .pytest_cache/
 schemes/
+input/
+output/
 
 config/user_parameters.yaml
 config/sample_sheet.yaml
