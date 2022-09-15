@@ -1,5 +1,5 @@
 <div align="center">
-    <h1>Juno_cgMLST</h1>
+    <h1>Juno-cgMLST</h1>
     <br />
     <h2>Pipeline to perform cgMLST (or wgMLST) analysis.</h2>
     <br />
@@ -17,7 +17,7 @@
 
 The goal of this pipeline is to perform cgMLST on bacterial genomes. As input, it requires an assembly for each sample you want to analyze in the form of a single ‘.fasta’ file.
 
-Importantly, the Juno-cgMLST pipeline also works directly on output generated from the [Juno-assembly pipeline](https://github.com/RIVM-bioinformatics/Juno_pipeline).
+Importantly, the Juno-cgMLST pipeline also works directly on output generated from the [Juno-Assembly pipeline](https://github.com/RIVM-bioinformatics/juno-assembly).
 
 The Juno-cgMLST uses [ChewBBACA](https://github.com/B-UMMI/chewBBACA/) to find the cgMLST profile of the given genomes. Besides, the result table with the allele numbers is translated to a table with (sha1) hashes so that they can be shared and compared even if each result used a different database. **Note:** We highly encourage to use the hashes for the analysis instead of the allele numbers. This will make your data more reproducible in case there was an update in the database that assigns allele numbers or to share it with other colleagues.
 
@@ -32,14 +32,14 @@ The Juno-cgMLST uses [ChewBBACA](https://github.com/B-UMMI/chewBBACA/) to find t
 1. Clone the repository:
 
 ```
-git clone https://github.com/RIVM-bioinformatics/Juno_cgmlst.git
+git clone https://github.com/RIVM-bioinformatics/juno-cgmlst.git
 ```
 Alternatively, you can download it manually as a zip file (you will need to unzip it then).
 
 2. Enter the directory with the pipeline and install the master environment:
 
 ```
-cd Juno_cgmlst
+cd juno-cgmlst
 conda env update -f envs/master_env.yaml
 ```
 
@@ -59,7 +59,7 @@ conda env update -f envs/master_env.yaml
   -h, --help            show this help message and exit
   -i DIR, --input DIR   Relative or absolute path to the input directory. It
                         must either be the output directory of the Juno-
-                        assembly pipeline or it must contain all the raw reads
+                        Assembly pipeline or it must contain all the raw reads
                         (fastq) and assemblies (fasta) files for all samples
                         to be processed.
   -m FILE, --metadata FILE
@@ -144,7 +144,7 @@ python juno_cgmlst.py -i my_large_input_dir -o my_results_dir --db_dir my_db_dir
     - The analysis of separate samples is not completely parallelized. ChewBBACA tries to optimize the analysis but many steps have to be shared between samples. **ChewBBACA blocks the directory with the database** so that **two different analyses cannot be done using the same database at the same time**. This has a reason and that is that if a new allele is found in your dataset, ChewBBACA ensures that a new allele number gets assigned to it and that this one is not concurrently assigned by another running process in the same database. However, this feature can be really problematic for databases where multiple people might be using the pipeline at the same time (as may be the case at the RIVM). You cannot put samples running in parallel (which might be only moderately more efficient anyway because of the shared steps which are long anyway) and more importantly, two people cannot be running an analysis at the same time. This includes automated runs in which samples from different genera, such as _Shigella_  and _Escherichia_ will be processed at the same time and both will be running the same cgMLST scheme but would interfere with each other causing the crash of one of them.   
     - Every time a new allele is found for a schema, it can cause some results to lose reproducibility. In these
      cases, the allele distance might be underestimated so this means that the ability to detect a sample as part of an outbreak would not decrease. You would, however, include more false positives. It is something that can be tolerated for our purposes but can cause confusion among analysts. It, in theory, should be improved once your database is more stable and no more novel alleles are found. The explanation of why that happens can be found [here](https://github.com/B-UMMI/chewBBACA/issues/115).  
-* Any issue can be reported in the [Issues section](https://github.com/RIVM-bioinformatics/Juno-typing/issues) of this repository.
+* Any issue can be reported in the [Issues section](https://github.com/RIVM-bioinformatics/juno-cgmlst/issues) of this repository.
 
 ## Future ideas for this pipeline
 
