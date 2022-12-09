@@ -68,7 +68,7 @@ class JunoCgmlstRun(
         base_juno_pipeline.RunSnakemake.__init__(
             self,
             pipeline_name="Juno_cgMLST",
-            pipeline_version="v0.1",
+            pipeline_version=__version__,
             output_dir=output_dir,
             workdir=workdir,
             cores=self.cores,

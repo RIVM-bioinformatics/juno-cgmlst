@@ -36,11 +36,11 @@ git clone https://github.com/RIVM-bioinformatics/juno-cgmlst.git
 ```
 Alternatively, you can download it manually as a zip file (you will need to unzip it then).
 
-2. Enter the directory with the pipeline and install the master environment:
+2. Enter the directory with the pipeline and install the main environment:
 
 ```
 cd juno-cgmlst
-conda env update -f envs/master_env.yaml
+conda env update -f envs/juno_cgmlst.yaml
 ```
 
 ## Parameters & Usage
