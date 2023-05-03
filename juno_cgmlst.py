@@ -9,94 +9,87 @@ Date: 06-05-2022
 """
 
 # Dependencies
-from base_juno_pipeline import *
-from bin.version import __version__
+from juno_library import Pipeline
+from version import __version__, __package_name__
 import argparse
-import pathlib
+from pathlib import Path
 import subprocess
 import yaml
-import sys
+from dataclasses import dataclass
 
 # Own scripts
 from bin import download_cgmlst_scheme
 
 
-class JunoCgmlstRun(
-    base_juno_pipeline.PipelineStartup, base_juno_pipeline.RunSnakemake
-):
+def main() -> None:
+    juno_cgmlst = JunoCgmlst()
+    juno_cgmlst.run()
+
+
+@dataclass
+class JunoCgmlst(Pipeline):
     """
     Class with the arguments and specifications that are only for the
     Juno-cgMLST pipeline but inherit from PipelineStartup and
     RunSnakemake
     """
 
-    def __init__(
-        self,
-        input_dir,
-        output_dir,
-        genus=None,
-        metadata=None,
-        db_dir="/mnt/db/juno/cgmlst",
-        cores=300,
-        time_limit=60,
-        local=False,
-        queue="bio",
-        unlock=False,
-        rerunincomplete=False,
-        dryrun=False,
-        run_in_container=True,
-        singularity_prefix=None,
-        conda_prefix=None,
-        **kwargs,
-    ):
-        """Initiating Juno-cgMLST pipeline"""
+    pipeline_name: str = __package_name__
+    pipeline_version: str = __version__
+    input_type: str = "fasta"
+    min_num_lines: int = 2
 
-        # Get proper file paths
-        output_dir = pathlib.Path(output_dir).resolve()
-        workdir = pathlib.Path(__file__).parent.resolve()
-        self.db_dir = pathlib.Path(db_dir).resolve()
-        self.downloaded_schemes_dir = self.db_dir.joinpath("downloaded_schemes")
-        self.prepared_schemes_dir = self.db_dir.joinpath("prepared_schemes")
-        self.path_to_audit = output_dir.joinpath("audit_trail")
-        self.cores = cores
-        base_juno_pipeline.PipelineStartup.__init__(
-            self,
-            input_dir=pathlib.Path(input_dir).resolve(),
-            input_type="fasta",
-            min_num_lines=2,
-        )  # Min for viable fasta
-        base_juno_pipeline.RunSnakemake.__init__(
-            self,
-            pipeline_name="Juno_cgMLST",
-            pipeline_version=__version__,
-            output_dir=output_dir,
-            workdir=workdir,
-            cores=self.cores,
-            time_limit=time_limit,
-            local=local,
-            queue=queue,
-            unlock=unlock,
-            rerunincomplete=rerunincomplete,
-            dryrun=dryrun,
-            useconda=not run_in_container,
-            conda_prefix=conda_prefix,
-            usesingularity=run_in_container,
-            singularityargs=f"--bind {self.input_dir}:{self.input_dir} --bind {output_dir}:{output_dir} --bind {db_dir}:{db_dir}",
-            singularity_prefix=singularity_prefix,
-            restarttimes=1,
-            latency_wait=60,
-            name_snakemake_report=str(
-                self.path_to_audit.joinpath("juno_cgmlst_report.html")
-            ),
-            **kwargs,
+    def _add_args_to_parser(self) -> None:
+        super()._add_args_to_parser()
+
+        self.parser.description = "Juno-typing pipeline. Automated pipeline for bacterial subtyping (7-locus MLST and serotyping)."
+        self.add_argument(
+            "-g",
+            "--genus",
+            type=lambda s: s.strip().lower(),
+            default=None,
+            required=True,
+            metavar="GENUS",
+            help="Genus name (any species in the metadata file will overwrite this argument).",
+        )
+        self.add_argument(
+            "-d",
+            "--db_dir",
+            type=Path,
+            required=False,
+            metavar="DIR",
+            default="/mnt/db/juno/cgmlst",
+            help="Relative or absolute path to the directory that contains the databases for all the tools used in this pipeline or where they should be downloaded. Default is: /mnt/db/juno/cgmlst",
+        )
+        self.add_argument(
+            "-m",
+            "--metadata",
+            type=Path,
+            default=None,
+            required=False,
+            metavar="FILE",
+            help="Relative or absolute path to the metadata csv file. If "
+            "provided, it must contain at least one column named 'sample' "
+            "with the name of the sample (same than file name but removing "
+            "the suffix _R1.fastq.gz), a column called "
+            "'genus' and a column called 'species'. The genus and species "
+            "provided will be used to choose the serotyper and the MLST schema(s)."
+            "If a metadata file is provided, it will overwrite the --species "
+            "argument for the samples present in the metadata file.",
         )
 
-        # Pipeline attributes
-        self.genus = genus
-        self.metadata_file = metadata
+    def _parse_args(self) -> argparse.Namespace:
+        # Remove this if containers can be used with juno-typing
+        if "--no-containers" not in self.argv:
+            self.argv.append("--no-containers")
 
-        # Start pipeline
-        self.run_juno_cgmlst_pipeline()
+        args = super()._parse_args()
+        self.genus = args.genus
+        self.db_dir: Path = args.db_dir
+        self.downloaded_schemes_dir = self.db_dir.joinpath("downloaded_schemes")
+        self.prepared_schemes_dir = self.db_dir.joinpath("prepared_schemes")
+        self.metadata_file: Path = args.metadata
+        return args
 
     def get_cgmlst_scheme_name(self):
         with open("files/dictionary_correct_cgmlst_scheme.yaml") as translation_yaml:
@@ -133,30 +126,20 @@ class JunoCgmlstRun(
                 )
         self.get_cgmlst_scheme_name()
 
-    def start_juno_cgmlst_pipeline(self):
-        """
-        Function to start the pipeline (some steps from PipelineStartup need
-        to be modified for the Juno-cgmlst pipeline to accept fastq and fasta
-        input
-        """
-        self.start_juno_pipeline()
+    def setup(self) -> None:
+        super().setup()
         self.update_sample_dict_with_metadata()
-        # Write sample_sheet
-        with open(self.sample_sheet, "w") as file_:
-            yaml.dump(self.sample_dict, file_, default_flow_style=False)
-
-    def write_userparameters(self):
-
-        config_params = {
+        self.user_parameters = {
             "input_dir": str(self.input_dir),
             "out": str(self.output_dir),
             "cgmlst_db": str(self.db_dir),
         }
 
-        with open(self.user_parameters, "w") as file_:
-            yaml.dump(config_params, file_, default_flow_style=False)
-
-        return config_params
+        with open(
+            Path(__file__).parent.joinpath("config/pipeline_parameters.yaml")
+        ) as f:
+            parameters_dict = yaml.safe_load(f)
+        self.snakemake_config.update(parameters_dict)
 
     def download_missing_schemes(self):
         all_needed_schemes = set()
@@ -177,24 +160,20 @@ class JunoCgmlstRun(
                         )
                         if not end_file_download.is_file():
                             all_needed_schemes.add(scheme)
-        if len(all_needed_schemes) > 0:
+        if all_needed_schemes:
             download_cgmlst_scheme.cgMLSTSchemes(
-                threads=self.cores,
+                threads=self.snakemake_args["cores"],
                 genus_list=all_needed_schemes,
                 download_loci=True,
-                output_dir=self.downloaded_schemes_dir,
+                output_dir=str(self.downloaded_schemes_dir),
             )
 
     def run_juno_cgmlst_pipeline(self):
-        self.start_juno_cgmlst_pipeline()
-        self.user_params = self.write_userparameters()
-        self.get_run_info()
+        self.setup()
         if not self.dryrun or self.unlock:
             self.path_to_audit.mkdir(parents=True, exist_ok=True)
             self.download_missing_schemes()
-
-        self.successful_run = self.run_snakemake()
-        assert self.successful_run, f"Please check the log files"
+        super().run()
         if not self.dryrun or self.unlock:
             subprocess.run(
                 f"find {self.output_dir} -type f -empty -exec rm {{}} \;", shell=True
@@ -203,142 +182,7 @@ class JunoCgmlstRun(
                 f"find {self.output_dir} -type d -empty -exec rm -rf {{}} \;",
                 shell=True,
             )
-            self.make_snakemake_report()
 
 
 if __name__ == "__main__":
-    parser = argparse.ArgumentParser(
-        description="Juno-cgMLST pipeline. Automated pipeline for performing cgMLST or wgMLST."
-    )
-    parser.add_argument(
-        "-i",
-        "--input",
-        type=pathlib.Path,
-        required=True,
-        metavar="DIR",
-        help="Relative or absolute path to the input directory. It must either be the output directory of the Juno-assembly pipeline or it must contain all the raw reads (fastq) and assemblies (fasta) files for all samples to be processed.",
-    )
-    parser.add_argument(
-        "-m",
-        "--metadata",
-        type=pathlib.Path,
-        default=None,
-        required=False,
-        metavar="FILE",
-        help="Relative or absolute path to the metadata csv file. If "
-        "provided, it must contain at least one column named 'sample' "
-        "with the name of the sample (same than file name but removing "
-        "the suffix _R1.fastq.gz) and a column called "
-        "'genus'. The genus provided will be used to choose the "
-        "cgMLST schema(s). If a metadata file is provided, it will "
-        "overwrite the --genus argument for the samples present in "
-        "the metadata file.",
-    )
-    parser.add_argument(
-        "-g",
-        "--genus",
-        default=None,
-        required=False,
-        metavar="FILE",
-        help="Genus name (any genus in the metadata file will overwrite"
-        " this argument). It should be given as two words (e.g. "
-        "--genus Salmonella)",
-    )
-    parser.add_argument(
-        "-o",
-        "--output",
-        type=pathlib.Path,
-        metavar="DIR",
-        default="output",
-        help="Relative or absolute path to the output directory. If non is given, an 'output' directory will be created in the current directory.",
-    )
-    parser.add_argument(
-        "-d",
-        "--db_dir",
-        type=pathlib.Path,
-        required=False,
-        metavar="DIR",
-        default="/mnt/db/juno/cgmlst",
-        help="Relative or absolute path to the directory that contains the databases for all the tools used in this pipeline or where they should be downloaded. Default is: /mnt/db/juno/cgmlst",
-    )
-    parser.add_argument(
-        "-c",
-        "--cores",
-        type=int,
-        metavar="INT",
-        default=300,
-        help="Number of cores to use. Default is 300",
-    )
-    parser.add_argument(
-        "-q",
-        "--queue",
-        type=str,
-        metavar="STR",
-        default="bio",
-        help="Name of the queue that the job will be submitted to if working on a cluster.",
-    )
-    parser.add_argument(
-        "-w",
-        "--time-limit",
-        type=int,
-        metavar="INT",
-        default=60,
-        help="Time limit per job in minutes (passed as -W argument to bsub). Jobs will be killed if not finished in this time.",
-    )
-    parser.add_argument(
-        "-l",
-        "--local",
-        action="store_true",
-        help="Running pipeline locally (instead of in a computer cluster). Default is running it in a cluster.",
-    )
-    # Snakemake arguments
-    parser.add_argument(
-        "-u",
-        "--unlock",
-        action="store_true",
-        help="Unlock output directory (passed to snakemake).",
-    )
-    parser.add_argument(
-        "-n",
-        "--dryrun",
-        action="store_true",
-        help="Dry run printing steps to be taken in the pipeline without actually running it (passed to snakemake).",
-    )
-    parser.add_argument(
-        "--rerunincomplete",
-        action="store_true",
-        help="Re-run jobs if they are marked as incomplete (passed to snakemake).",
-    )
-    parser.add_argument(
-        "--snakemake-args",
-        nargs="*",
-        default={},
-        action=helper_functions.SnakemakeKwargsAction,
-        help="Extra arguments to be passed to snakemake API (https://snakemake.readthedocs.io/en/stable/api_reference/snakemake.html).",
-    )
-    parser.add_argument(
-        "--version",
-        "-v",
-        action="version",
-        version=__version__,
-        help="Show Juno_cgmlst version number and exit",
-    )
-    args = parser.parse_args()
-    JunoCgmlstRun(
-        input_dir=args.input,
-        output_dir=args.output,
-        genus=args.genus,
-        metadata=args.metadata,
-        db_dir=args.db_dir,
-        cores=args.cores,
-        time_limit=args.time_limit,
-        local=args.local,
-        queue=args.queue,
-        unlock=args.unlock,
-        rerunincomplete=args.rerunincomplete,
-        dryrun=args.dryrun,
-        run_in_container=False,
-        singularity_prefix=None,
-        conda_prefix=None,
-        **args.snakemake_args,
-    )
+    main()

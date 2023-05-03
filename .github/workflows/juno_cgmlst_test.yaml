@@ -37,6 +37,3 @@ jobs:
       - name: Test that the functions to download cgmlst schemes from different websites work.
         shell: bash -l {0}
         run: python ./tests/test_download_cgmlst_schemes.py
-      - name: Test the script to hash the cgMLST result.
-        shell: bash -l {0}
-        run: python ./tests/test_hasher_cgmlst.py

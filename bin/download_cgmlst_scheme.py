@@ -1,5 +1,8 @@
 import argparse
-import base_juno_pipeline.helper_functions as juno_helpers
+
+# import base_juno_pipeline.helper_functions as juno_helpers
+from juno_library.juno_library import error_formatter, message_formatter
+
 import bs4
 import dask.bag as db
 from datetime import datetime
@@ -67,11 +70,10 @@ cgmlst_schemes = {
 }
 
 
-class cgMLSTSchemes(juno_helpers.JunoHelpers):
+class cgMLSTSchemes:
     """Class containing information and functions to download cgMLST schemes"""
 
     def __init__(self, genus_list, output_dir="output", threads=2, download_loci=True):
-
         self.output_dir = pathlib.Path(output_dir)
         self.threads = int(threads)
         self.genus_list = [genus.lower() for genus in genus_list]
@@ -89,7 +91,7 @@ class cgMLSTSchemes(juno_helpers.JunoHelpers):
         some_genus_not_supported = len(genus_not_found) > 0
         if some_genus_not_supported:
             warnings.warn(
-                self.error_formatter(
+                error_formatter(
                     f'The following genus are currently not supported for cgMLST: {",".join(genus_not_found)}. '
                     "The schemes for those genus/genera will not be downloaded"
                 )
@@ -103,9 +105,8 @@ class cgMLSTSchemes(juno_helpers.JunoHelpers):
                 if not genus.startswith("test_")
             ]
             raise ValueError(
-                self.error_formatter(
-                    "None of the provided genera is supported for cgMLST. "
-                    f'The supported genera/species are: {",".join(supported_genera)}'
+                error_formatter(
+                    f'None of the provided genera is supported for cgMLST. The supported genera/species are: {",".join(supported_genera)}'
                 )
             )
 
@@ -160,7 +161,7 @@ class cgMLSTSchemes(juno_helpers.JunoHelpers):
             scheme = json.load(scheme_definition)
         if self.download_loci:
             print(
-                self.message_formatter(
+                message_formatter(
                     f'Downloading {scheme["locus_count"]} loci from PubMLST server...'
                 )
             )
@@ -199,7 +200,7 @@ class cgMLSTSchemes(juno_helpers.JunoHelpers):
                     loci_list.append(locus_url)
         if self.download_loci:
             print(
-                self.message_formatter(
+                message_formatter(
                     f"Downloading {len(loci_list)} loci from Enterobase server..."
                 )
             )
@@ -224,7 +225,7 @@ class cgMLSTSchemes(juno_helpers.JunoHelpers):
                     loci_list.append(locus_url)
         if self.download_loci:
             print(
-                self.message_formatter(
+                message_formatter(
                     f"Downloading {len(loci_list)} loci from SeqSphere+ server..."
                 )
             )
@@ -239,7 +240,7 @@ class cgMLSTSchemes(juno_helpers.JunoHelpers):
         for genus in genus_list:
             source = self.schemes[genus]["source"]
             print(
-                self.message_formatter(
+                message_formatter(
                     f"Collecting cgMLST scheme for {genus.title()} from {source.title()}..."
                 )
             )
