@@ -24,7 +24,7 @@ with open(sample_sheet) as sample_sheet_file:
 SCHEMES = set()
 for sample in SAMPLES:
     for scheme_ in SAMPLES[sample]["cgmlst_scheme"]:
-        if scheme_ is not None:
+        if scheme_:
             SCHEMES.add(scheme_)
 
 # OUT defines output directory for most rules.

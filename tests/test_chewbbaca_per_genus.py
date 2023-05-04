@@ -11,7 +11,8 @@ from bin import chewbbaca_input_files
 
 
 class TestChewbbacaPerGenus(unittest.TestCase):
-    def setUpClass():
+    @classmethod
+    def setUpClass(cls) -> None:
         os.system("mkdir -p test_chewbbaca_per_genus")
         os.system("mkdir -p test_chewbbaca_per_genus/sample1")
         os.system("mkdir -p test_chewbbaca_per_genus/sample2")
@@ -21,10 +22,11 @@ class TestChewbbacaPerGenus(unittest.TestCase):
         os.system("mkdir -p test_chewbbaca_per_genus/sample6")
         os.system("mkdir -p test_chewbbaca_per_genus/output")
 
-    def tearDownClass():
+    @classmethod
+    def tearDownClass(cls) -> None:
         os.system("rm -rf test_chewbbaca_per_genus")
 
-    def test_dict_with_samples_per_genus(self):
+    def test_dict_with_samples_per_genus(self) -> None:
         """Testing whether the dictionary with samples belonging to a
         genus is created properly for a simple sample
         """
@@ -41,7 +43,7 @@ class TestChewbbacaPerGenus(unittest.TestCase):
         actual_output = input_chewbbaca.cgmlst_scheme_dict
         self.assertDictEqual(expected_output, actual_output, actual_output)
 
-    def test_dict_with_samples_per_genus_if_two_cgmlst_schemes_needed(self):
+    def test_dict_with_samples_per_genus_if_two_cgmlst_schemes_needed(self) -> None:
         """Testing whether the dictionary with samples belonging to a
         genus is created properly for a Listeria and Escherichia, where two
         cgMLST schemes are needed.
@@ -72,7 +74,7 @@ class TestChewbbacaPerGenus(unittest.TestCase):
         actual_output = input_chewbbaca.cgmlst_scheme_dict
         self.assertDictEqual(expected_output, actual_output, actual_output)
 
-    def test_genus_dict_for_multifiles_multigenera(self):
+    def test_genus_dict_for_multifiles_multigenera(self) -> None:
         """Testing whether the dictionary with sample files is created properly
         when multiple samples from multiple genera are included
         """
@@ -110,7 +112,7 @@ class TestChewbbacaPerGenus(unittest.TestCase):
         actual_output = input_chewbbaca.cgmlst_scheme_dict
         self.assertDictEqual(expected_output, actual_output, actual_output)
 
-    def test_genus_dict_multifiles_multigenera_ignoring_nonsupported(self):
+    def test_genus_dict_multifiles_multigenera_ignoring_nonsupported(self) -> None:
         """Testing whether the dictionary with sample files is created properly
         when multiple samples from multiple genera are included. However,
         unsupported genera (in this case fakegenus) should be ignored.

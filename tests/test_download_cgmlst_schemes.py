@@ -1,21 +1,26 @@
 import os
 from pathlib import Path
-from sys import path
+import sys
 import unittest
 
-main_script_path = str(Path(Path(__file__).parent.absolute()).parent.absolute())
-path.insert(0, main_script_path)
+# main_script_path = str(Path(Path(__file__).parent.absolute()).parent.absolute())
+# path.insert(0, main_script_path)
+# from bin import download_cgmlst_scheme
+
+sys.path.append(str(Path(__file__).parent.parent.absolute()))
 from bin import download_cgmlst_scheme
 
 
 class TestDownloadcgMLSTSchemes(unittest.TestCase):
-    def setUpClass():
+    @classmethod
+    def setUpClass(cls) -> None:
         os.system("mkdir -p test_output")
 
-    def tearDownClass():
+    @classmethod
+    def tearDownClass(cls) -> None:
         os.system("rm -rf test_output")
 
-    def test_output_dir_is_removed_if_download_is_false(self):
+    def test_output_dir_is_removed_if_download_is_false(self) -> None:
         """Testing there is no error if output dir does not exist and that
         it is created then
         """
@@ -28,7 +33,7 @@ class TestDownloadcgMLSTSchemes(unittest.TestCase):
         self.assertFalse(dir_with_downloaded_scheme.is_dir())
         self.assertFalse(Path("test_output").is_dir())
 
-    def test_output_dir_is_not_removed_if_not_empty(self):
+    def test_output_dir_is_not_removed_if_not_empty(self) -> None:
         """Testing there is no error if output dir does not exist and that
         it is created then
         """
@@ -43,7 +48,7 @@ class TestDownloadcgMLSTSchemes(unittest.TestCase):
         dir_with_downloaded_scheme = Path("test_output", "salmonella")
         self.assertTrue(dir_with_downloaded_scheme.is_dir())
 
-    def test_salmonella_and_shigella_cgMLSTschemes(self):
+    def test_salmonella_and_shigella_cgMLSTschemes(self) -> None:
         """The Salmonella and Shigella schemes should be properly
         found from Enterobase
         """
@@ -77,7 +82,7 @@ class TestDownloadcgMLSTSchemes(unittest.TestCase):
         dir_with_downloaded_scheme = Path("test_output", "shigella")
         self.assertFalse(dir_with_downloaded_scheme.is_dir())
 
-    def test_warning_when_some_species_not_supported_for_cgMLST(self):
+    def test_warning_when_some_species_not_supported_for_cgMLST(self) -> None:
         """If at least one of the species/genera provided for downloading the
         cgMLST scheme is not supported (not on the list of downloadable
         schemes) then a warning should be thrown
@@ -93,7 +98,7 @@ class TestDownloadcgMLSTSchemes(unittest.TestCase):
             download_loci=False,
         )
 
-    def test_error_when_none_of_listed_species_are_supported(self):
+    def test_error_when_none_of_listed_species_are_supported(self) -> None:
         """If none of the species/genera provided for downloading the
         cgMLST scheme is supported (none of them is on the list of
         downloadable schemes) then an error should be thrown
@@ -109,7 +114,7 @@ class TestDownloadcgMLSTSchemes(unittest.TestCase):
             download_loci=False,
         )
 
-    def test_genus_given_in_capital_letters(self):
+    def test_genus_given_in_capital_letters(self) -> None:
         """The Salmonella scheme should be found even if the genus name
         is given in small letters (no first capital)
         """
@@ -129,7 +134,7 @@ class TestDownloadcgMLSTSchemes(unittest.TestCase):
         self.assertTrue("salmonella" in cgMLSTschemes_result.schemes)
         self.assertEqual(cgMLSTschemes_result.schemes, expected_result)
 
-    def test_genus_given_in_firstcapital_letter(self):
+    def test_genus_given_in_firstcapital_letter(self) -> None:
         """The Salmonella scheme should be found even if the genus name
         is given in all capital letters (no first capital and other small)
         """
@@ -149,7 +154,7 @@ class TestDownloadcgMLSTSchemes(unittest.TestCase):
         self.assertTrue("salmonella" in cgMLSTschemes_result.schemes)
         self.assertEqual(cgMLSTschemes_result.schemes, expected_result)
 
-    def test_pubmlst_scheme_is_properly_downloaded(self):
+    def test_pubmlst_scheme_is_properly_downloaded(self) -> None:
         """A test subfolder should be created and a fasta files per locus
         should be downloaded
         """
@@ -170,7 +175,7 @@ class TestDownloadcgMLSTSchemes(unittest.TestCase):
         len(fasta_files_in_downloaded_scheme)
         self.assertEqual(len(fasta_files_in_downloaded_scheme), 7)
 
-    def test_bigsdb_pasteur_scheme_is_properly_downloaded(self):
+    def test_bigsdb_pasteur_scheme_is_properly_downloaded(self) -> None:
         """A test subfolder should be created and a fasta files per locus
         should be downloaded
         """
@@ -194,7 +199,7 @@ class TestDownloadcgMLSTSchemes(unittest.TestCase):
         len(fasta_files_in_downloaded_scheme)
         self.assertEqual(len(fasta_files_in_downloaded_scheme), 7)
 
-    def test_enterobase_scheme_is_properly_downloaded(self):
+    def test_enterobase_scheme_is_properly_downloaded(self) -> None:
         """A test subfolder should be created and a fasta files per locus
         should be downloaded
         """

@@ -91,7 +91,7 @@ class JunoCgmlst(Pipeline):
         self.metadata_file: Path = args.metadata
         return args
 
-    def get_cgmlst_scheme_name(self):
+    def set_scheme_in_sample_dict(self) -> None:
         with open("files/dictionary_correct_cgmlst_scheme.yaml") as translation_yaml:
             self.cgmlst_scheme_translation_tbl = yaml.safe_load(translation_yaml)
         for sample in self.sample_dict:
@@ -101,9 +101,9 @@ class JunoCgmlst(Pipeline):
                     "cgmlst_scheme"
                 ] = self.cgmlst_scheme_translation_tbl[genus]
             except KeyError:
-                self.sample_dict[sample]["cgmlst_scheme"] = [None]
+                self.sample_dict[sample]["cgmlst_scheme"] = ""
 
-    def update_sample_dict_with_metadata(self):
+    def update_sample_dict_with_metadata(self) -> None:
         self.get_metadata_from_csv_file(
             filepath=self.metadata_file, expected_colnames=["sample", "genus"]
         )
@@ -124,7 +124,7 @@ class JunoCgmlst(Pipeline):
                 self.sample_dict[sample]["genus"] = (
                     self.sample_dict[sample]["genus"].strip().lower()
                 )
-        self.get_cgmlst_scheme_name()
+        self.set_scheme_in_sample_dict()
 
     def setup(self) -> None:
         super().setup()
@@ -141,8 +141,8 @@ class JunoCgmlst(Pipeline):
             parameters_dict = yaml.safe_load(f)
         self.snakemake_config.update(parameters_dict)
 
-    def download_missing_schemes(self):
-        all_needed_schemes = set()
+    def download_missing_schemes(self) -> None:
+        all_needed_schemes: set[str] = set()
         for sample in self.sample_dict:
             try:
                 schemes = self.sample_dict[sample]["cgmlst_scheme"]
@@ -168,7 +168,7 @@ class JunoCgmlst(Pipeline):
                 output_dir=str(self.downloaded_schemes_dir),
             )
 
-    def run_juno_cgmlst_pipeline(self):
+    def run_juno_cgmlst_pipeline(self) -> None:
         self.setup()
         if not self.dryrun or self.unlock:
             self.path_to_audit.mkdir(parents=True, exist_ok=True)

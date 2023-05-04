@@ -11,8 +11,10 @@ class inputChewBBACA:
     """
 
     def __init__(
-        self, sample_sheet="config/sample_sheet.yaml", output_dir="output/cgmlst/"
-    ):
+        self,
+        sample_sheet: str = "config/sample_sheet.yaml",
+        output_dir: str = "output/cgmlst/",
+    ) -> None:
         """Constructor"""
         with open("files/dictionary_correct_cgmlst_scheme.yaml") as file_:
             self.supported_genera = safe_load(file_)
@@ -22,14 +24,14 @@ class inputChewBBACA:
         ), f"The provided sample sheet {str(self.sample_sheet)} does not exist."
         self.output_dir = Path(output_dir)
 
-    def __read_sample_sheet(self):
+    def __read_sample_sheet(self) -> None:
         print("Reading sample sheet...\n")
         with open(self.sample_sheet) as sample_sheet_file:
             self.samples_dict = safe_load(sample_sheet_file)
 
-    def __enlist_samples_per_scheme(self):
+    def __enlist_samples_per_scheme(self) -> dict[str, list[str]]:
         print(f"Getting list of samples per scheme found...\n")
-        scheme_dict = {}
+        scheme_dict: dict[str, list[str]] = {}
         for sample in self.samples_dict:
             for scheme in self.samples_dict[sample]["cgmlst_scheme"]:
                 if scheme is not None:
@@ -41,7 +43,7 @@ class inputChewBBACA:
                         scheme_dict[scheme] = [self.samples_dict[sample]["assembly"]]
         return scheme_dict
 
-    def make_file_with_samples_per_scheme(self):
+    def make_file_with_samples_per_scheme(self) -> dict[str, list[str]]:
         self.__read_sample_sheet()
         cgmlst_scheme_dict = self.__enlist_samples_per_scheme()
         for scheme in cgmlst_scheme_dict:

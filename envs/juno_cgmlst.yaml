@@ -28,3 +28,5 @@ dependencies:
   - pip=23.*
   - pip:
     - "--editable=git+https://github.com/RIVM-bioinformatics/juno-library.git@v2.0.1#egg=juno_library"
+    - types-beautifulsoup4
+    - types-requests
