@@ -61,9 +61,9 @@ rule enlist_samples_for_cgmlst_scheme:
         "Finding which cgMLST scheme needs to be run for each sample."
     log:
         OUT + "/log/cgmlst/list_samples_per_cgmlst_scheme.log",
-    threads: config["threads"]["other"]
+    threads: int(config["threads"]["other"])
     resources:
-        mem_gb=config["mem_gb"]["other"],
+        mem_gb=int(config["mem_gb"]["other"]),
     params:
         output_dir=OUT + "/cgmlst",
     shell:
@@ -88,9 +88,9 @@ rule cgmlst_per_scheme:
         "envs/chewbbaca.yaml"
     log:
         OUT + "/log/cgmlst/chewbbaca_{scheme}.log",
-    threads: config["threads"]["chewbbaca"]
+    threads: int(config["threads"]["chewbbaca"])
     resources:
-        mem_gb=config["mem_gb"]["chewbbaca"],
+        mem_gb=int(config["mem_gb"]["chewbbaca"]),
     params:
         output_dir=abspath(OUT + "/cgmlst/{scheme}"),
         db_dir=CGMLST_DB,
