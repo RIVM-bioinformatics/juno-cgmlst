@@ -16,36 +16,22 @@ else
     exit 1
 fi
 
-# if [ ! -d "${input_dir}" ] || [ ! -d "${output_dir}" ] || [ ! -d "${input_dir}/clean_fastq" ]
-# then
-#   echo "The input directory $input_dir, output directory $output_dir or fastq dir ${input_dir}/clean_fastq does not exist"
-#   exit 1
-# else
-#   input_fastq="${input_dir}/clean_fastq"
-# fi
-
-
 
 #----------------------------------------------#
 # Create/update necessary environments
-PATH_MAMBA_YAML="envs/mamba.yaml"
-PATH_MASTER_YAML="envs/juno_cgmlst.yaml"
-MAMBA_NAME=$(head -n 1 ${PATH_MAMBA_YAML} | cut -f2 -d ' ')
-MASTER_NAME=$(head -n 1 ${PATH_MASTER_YAML} | cut -f2 -d ' ')
+MAIN_ENV_YAML="envs/juno_cgmlst.yaml"
+MAIN_ENV=$(head -n 1 ${MAIN_ENV_YAML} | cut -f2 -d ' ')
 
 echo -e "\nUpdating necessary environments to run the pipeline..."
 
 # Removing strict mode because it sometimes breaks the code for 
 # activating an environment and for testing whether some variables
 # are set or not
-set +euo pipefail 
+set +euo pipefail
 
-conda env update -f "${PATH_MAMBA_YAML}"
-source activate "${MAMBA_NAME}"
+mamba env update -f "${MAIN_ENV_YAML}"
 
-mamba env update -f "${PATH_MASTER_YAML}"
-
-source activate "${MASTER_NAME}"
+source activate "${MAIN_ENV}"
 
 set -euo pipefail
 
@@ -86,16 +72,7 @@ case $PROJECT_NAME in
     ;;
 esac
 
-#----------------------------------------------#
-# Copying database directory if it exists
-DB_DIR="schemes"
-for G in $GENUS_ALL
-do
-  echo -e "\nCopying the cgMLST schema from /mnt/db/juno/cgmlst/prepared_schemes/$G..."
-  mkdir -p "$DB_DIR/prepared_schemes"
-  cp -r --no-preserve=mode,ownership "/mnt/db/juno/cgmlst/prepared_schemes/$G" "$DB_DIR/prepared_schemes/$G"
-  cp --no-preserve=mode,ownership /mnt/db/juno/cgmlst/prepared_schemes/${G}_{sum,inv}*.txt "$DB_DIR/prepared_schemes/"
-done
+DB_DIR="/mnt/db/juno/cgmlst/"
 
 #----------------------------------------------#
 # Run the pipeline

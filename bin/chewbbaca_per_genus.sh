@@ -5,7 +5,7 @@ set -x
 input_files=$(realpath "$1")
 threads="$2"
 output_dir="$3"
-db_dir="$4"
+db_dir=$(realpath "$4")
 genus="$5"
 
 # Make new variables
@@ -17,7 +17,7 @@ prodigal_training_file=$(realpath "$script_path/../files/prodigal_training_files
 echo "Deleting any previous results from old ChewBBACA runs if existing in ${output_dir}...\n"
 rm -rf "results_*"  
 
-if [ ! -f "$db_dir/prepared_schemes/${genus}_summary_stats.txt" ]; then
+if [ ! -f "$db_dir/prepared_schemes/$genus/$genus.trn" ]; then
     echo "Preparing scheme for running it with ChewBBACA..."
     chewBBACA.py PrepExternalSchema -i "$downloaded_scheme" \
         --output-directory "$prepared_scheme" \
@@ -33,15 +33,18 @@ cd "${output_dir}"
 echo "Running ChewBBACA for ${genus} scheme...\n"
 chewBBACA.py AlleleCall --cpu ${threads} \
                 -i "${input_files}" \
-                -g "${prepared_scheme}" \
                 -o "." \
-                --ptf "$prodigal_training_file" \
-                --fr
+                -g "${prepared_scheme}" \
+                --no-inferred \
+                --hash-profiles sha1
+                # --ptf "$prodigal_training_file" \
+                # --fr
 
 find "." -type f -name "results_alleles.tsv" -exec cp {} "." \;
+find "." -type f -name "results_alleles_hashed.tsv" -exec cp {} "." \;
 
 # The newly identified alleles have the 'INF-' prefix
 # That can cause issues when calculating the distance matrix
 # because they will be seen as diferent from the alleles
 # that do not have the prefix. Therefore it is better to remove them
-sed -i -r "s/INF-([0-9]+)/\1/g" "results_alleles.tsv"
+# sed -i -r "s/INF-([0-9]+)/\1/g" "results_alleles.tsv"

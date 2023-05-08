@@ -1,11 +1,41 @@
-output/
-.snakemake/
-__pycache__/
-envs/src/
-.pytest_cache/
-schemes/
-input/
-output/
-
-config/user_parameters.yaml
+## Files to ignore
+# From previous tests
+sample_sheet.yaml
 config/sample_sheet.yaml
+config/variables.yaml
+tests/test_sample_sheet.yaml
+config/user_parameters.yaml
+wget-log
+*.csv
+
+# Jupyter notebook tests
+*.ipynb
+
+
+
+## Folders to ignore
+# From previous tests
+raw_data/
+out/
+output/
+db/
+db_test/
+fake_db/
+temp.*
+test_output/
+src/
+# Software downloaded
+bin/kma/
+bin/cge-mlst
+bin/kmerfinder/
+bin/kmerfinder_db/
+bin/characterize_neisseria_capsule
+# Snakemake
+.snakemake/
+.vscode/
+# Python
+__pycache__
+bin/__pycache__
+# Envs
+envs/src/
+

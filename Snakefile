@@ -16,15 +16,15 @@ from yaml import safe_load
 #####     Load samplesheet, load genus dict and define output directory     #####
 #################################################################################
 
-# Loading sample sheet as dictionary 
+# Loading sample sheet as dictionary
 sample_sheet = config["sample_sheet"]
 SAMPLES = {}
 with open(sample_sheet) as sample_sheet_file:
     SAMPLES = safe_load(sample_sheet_file)
 SCHEMES = set()
 for sample in SAMPLES:
-    for scheme_ in SAMPLES[sample]['cgmlst_scheme']:
-        if scheme_ is not None:
+    for scheme_ in SAMPLES[sample]["cgmlst_scheme"]:
+        if scheme_:
             SCHEMES.add(scheme_)
 
 # OUT defines output directory for most rules.
@@ -36,54 +36,64 @@ CGMLST_DB = config["cgmlst_db"]
 #####                       Specify final output                            #####
 #################################################################################
 
+
 localrules:
-    all
+    all,
+
 
 rule all:
     input:
-        expand(OUT + '/cgmlst/{scheme}/results_alleles.tsv', scheme=SCHEMES),
-        expand(OUT + '/cgmlst/{scheme}/hashed_results_alleles.csv', scheme=SCHEMES)
+        expand(OUT + "/cgmlst/{scheme}/results_alleles.tsv", scheme=SCHEMES),
+        expand(OUT + "/cgmlst/{scheme}/results_alleles_hashed.tsv", scheme=SCHEMES),
 
-#@################################################################################
-#@####                              Processes                                #####
-#@################################################################################
+
+# @################################################################################
+# @####                              Processes                                #####
+# @################################################################################
+
 
 rule enlist_samples_for_cgmlst_scheme:
     input:
-        sample_sheet
+        sample_sheet,
     output:
-        temp(expand(OUT + '/cgmlst/{scheme}_samples.txt', scheme=SCHEMES))
-    message: "Finding which cgMLST scheme needs to be run for each sample."
+        temp(expand(OUT + "/cgmlst/{scheme}_samples.txt", scheme=SCHEMES)),
+    message:
+        "Finding which cgMLST scheme needs to be run for each sample."
     log:
-        OUT + '/log/cgmlst/list_samples_per_cgmlst_scheme.log'
-    threads: config['threads']['other']
-    resources: mem_gb=config['mem_gb']['other']
+        OUT + "/log/cgmlst/list_samples_per_cgmlst_scheme.log",
+    threads: int(config["threads"]["other"])
+    resources:
+        mem_gb=int(config["mem_gb"]["other"]),
     params:
-        output_dir = OUT + '/cgmlst'
-    shell: 
+        output_dir=OUT + "/cgmlst",
+    shell:
         """
 python bin/chewbbaca_input_files.py --sample-sheet {input} \
     --output-dir {params.output_dir} &> {log}
         """
 
 
-#----------------------- Choose cgMLST scheme per genus ----------------------#
+# ----------------------- Choose cgMLST scheme per genus ----------------------#
+
 
 rule cgmlst_per_scheme:
     input:
-        input_files = OUT + '/cgmlst/{scheme}_samples.txt'
+        input_files=OUT + "/cgmlst/{scheme}_samples.txt",
     output:
-        chewbbaca_result = OUT + '/cgmlst/{scheme}/results_alleles.tsv'
-    message: "Running cgMLST for scheme {wildcards.scheme}"
+        chewbbaca_result=OUT + "/cgmlst/{scheme}/results_alleles.tsv",
+        chewbbaca_hashed=OUT + "/cgmlst/{scheme}/results_alleles_hashed.tsv",
+    message:
+        "Running cgMLST for scheme {wildcards.scheme}"
     conda:
-        'envs/chewbbaca.yaml'
+        "envs/chewbbaca.yaml"
     log:
-        OUT + '/log/cgmlst/chewbbaca_{scheme}.log'
-    threads: config['threads']['chewbbaca']
-    resources: mem_gb=config['mem_gb']['chewbbaca']
+        OUT + "/log/cgmlst/chewbbaca_{scheme}.log",
+    threads: int(config["threads"]["chewbbaca"])
+    resources:
+        mem_gb=int(config["mem_gb"]["chewbbaca"]),
     params:
-        output_dir = abspath(OUT + '/cgmlst/{scheme}'),
-        db_dir = CGMLST_DB
+        output_dir=abspath(OUT + "/cgmlst/{scheme}"),
+        db_dir=CGMLST_DB,
     shell:
         """
 bash bin/chewbbaca_per_genus.sh {input.input_files} \
@@ -94,41 +104,38 @@ bash bin/chewbbaca_per_genus.sh {input.input_files} \
         """
 
 
-rule hash_cgmlst:
-    input:
-        OUT + '/cgmlst/{scheme}/results_alleles.tsv'
-    output:
-        OUT + '/cgmlst/{scheme}/hashed_results_alleles.csv'
-    message: "Getting hashes for the cgMLST results for scheme {wildcards.scheme}"
-    log:
-        OUT + '/log/cgmlst/hashed_chewbbaca_{scheme}.log'
-    threads: config['threads']['other']
-    resources: mem_gb=config['mem_gb']['other']
-    params:
-        db_dir = CGMLST_DB + '/prepared_schemes/',
-        scheme = '{scheme}'
-    shell:
-        """
-python bin/get_allele_hashes.py --scheme-name {params.scheme} \
-                                --output {output} \
-                                --db-dir {params.db_dir} \
-                                --threads {threads} \
-                                {input} &> {log}
-        """
+# rule hash_cgmlst:
+#     input:
+#         OUT + '/cgmlst/{scheme}/results_alleles.tsv'
+#     output:
+#         OUT + '/cgmlst/{scheme}/hashed_results_alleles.csv'
+#     message: "Getting hashes for the cgMLST results for scheme {wildcards.scheme}"
+#     log:
+#         OUT + '/log/cgmlst/hashed_chewbbaca_{scheme}.log'
+#     threads: config['threads']['other']
+#     resources: mem_gb=config['mem_gb']['other']
+#     params:
+#         db_dir = CGMLST_DB + '/prepared_schemes/',
+#         scheme = '{scheme}'
+#     shell:
+#         """
+# python bin/get_allele_hashes.py --scheme-name {params.scheme} \
+#                                 --output {output} \
+#                                 --db-dir {params.db_dir} \
+#                                 --threads {threads} \
+#                                 {input} &> {log}
+#         """
 
 
-#@################################################################################
-#@####              Finalize pipeline (error/success)                        #####
-#@################################################################################
+# @################################################################################
+# @####              Finalize pipeline (error/success)                        #####
+# @################################################################################
+
 
 onerror:
     shell(
-    """
+        """
 find -maxdepth 1 -type d -empty -exec rm -rf {{}} \;
 echo -e "Something went wrong with Juno-cgMLST pipeline. Please check the logging files in {OUT}/log/"
     """
     )
-
-
-
-

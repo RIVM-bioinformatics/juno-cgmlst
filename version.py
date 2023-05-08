@@ -1,0 +1,6 @@
+__version__ = "0.2.2"
+__package_name__ = "juno_cgmlst"
+__authors__ = "Alejandra Hernández Segura and Karim Hajji"
+__email__ = "karim.hajji@rivm.nl"
+__license__ = "AGPLv3"
+__description__ = "Juno cgMLST is a pipeline that uses chewBBACA for MLST."

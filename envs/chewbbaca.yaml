@@ -3,7 +3,7 @@ channels:
   - bioconda
   - conda-forge
 dependencies:
-  - chewbbaca==2.8.4
-  - pip==19.2.3
+  - chewbbaca=3.2.0
+  - pip
   - pip:
     - PyYAML

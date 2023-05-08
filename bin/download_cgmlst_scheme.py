@@ -1,5 +1,8 @@
 import argparse
-import base_juno_pipeline.helper_functions as juno_helpers
+
+# import base_juno_pipeline.helper_functions as juno_helpers
+from juno_library.helper_functions import error_formatter, message_formatter
+
 import bs4
 import dask.bag as db
 from datetime import datetime
@@ -10,6 +13,8 @@ import requests
 import subprocess
 import warnings
 import yaml
+from pathlib import Path
+from typing import Any, Generator, Tuple, Iterable
 
 cgmlst_schemes = {
     "salmonella": {
@@ -67,11 +72,16 @@ cgmlst_schemes = {
 }
 
 
-class cgMLSTSchemes(juno_helpers.JunoHelpers):
+class cgMLSTSchemes:
     """Class containing information and functions to download cgMLST schemes"""
 
-    def __init__(self, genus_list, output_dir="output", threads=2, download_loci=True):
-
+    def __init__(
+        self,
+        genus_list: Iterable[str],
+        output_dir: str = "output",
+        threads: int = 2,
+        download_loci: bool = True,
+    ) -> None:
         self.output_dir = pathlib.Path(output_dir)
         self.threads = int(threads)
         self.genus_list = [genus.lower() for genus in genus_list]
@@ -89,7 +99,7 @@ class cgMLSTSchemes(juno_helpers.JunoHelpers):
         some_genus_not_supported = len(genus_not_found) > 0
         if some_genus_not_supported:
             warnings.warn(
-                self.error_formatter(
+                error_formatter(
                     f'The following genus are currently not supported for cgMLST: {",".join(genus_not_found)}. '
                     "The schemes for those genus/genera will not be downloaded"
                 )
@@ -103,9 +113,8 @@ class cgMLSTSchemes(juno_helpers.JunoHelpers):
                 if not genus.startswith("test_")
             ]
             raise ValueError(
-                self.error_formatter(
-                    "None of the provided genera is supported for cgMLST. "
-                    f'The supported genera/species are: {",".join(supported_genera)}'
+                error_formatter(
+                    f'None of the provided genera is supported for cgMLST. The supported genera/species are: {",".join(supported_genera)}'
                 )
             )
 
@@ -121,7 +130,13 @@ class cgMLSTSchemes(juno_helpers.JunoHelpers):
         }
         print(yaml.dump(self.schemes, default_flow_style=False))
 
-    def __download_wget(self, url, output_file, working_dir=".", timeout=200):
+    def __download_wget(
+        self,
+        url: str,
+        output_file: Path,
+        working_dir: Path = Path("."),
+        timeout: int = 200,
+    ) -> None:
         subprocess.run(
             f"wget --quiet --output-document {output_file} {url}",
             shell=True,
@@ -130,28 +145,27 @@ class cgMLSTSchemes(juno_helpers.JunoHelpers):
             cwd=working_dir,
         )
 
-    def download_pubmlst_locus(self, locus_url, output_dir_genus):
-        output_file = locus_url.split("/")[-1] + ".fasta"
+    def download_pubmlst_locus(self, locus_url: str, output_dir_genus: Path) -> None:
+        output_file = Path(locus_url.split("/")[-1] + ".fasta")
         locus_url = locus_url + "/alleles_fasta"
         if self.download_loci:
             self.__download_wget(locus_url, output_file, working_dir=output_dir_genus)
-        return True
 
-    def download_enterobase_locus(self, locus_url, output_dir_genus):
-        output_file = locus_url.split("/")[-1]
+    def download_enterobase_locus(self, locus_url: str, output_dir_genus: Path) -> None:
+        output_file = Path(locus_url.split("/")[-1])
         self.__download_wget(locus_url, output_file, working_dir=output_dir_genus)
         subprocess.run(
             ["gunzip", output_file], check=True, timeout=100, cwd=output_dir_genus
         )
-        return True
 
-    def download_seqsphere_locus(self, locus_url, output_dir_genus):
-        output_file = locus_url.split("/")[-1]
+    def download_seqsphere_locus(self, locus_url: str, output_dir_genus: Path) -> None:
+        output_file = Path(locus_url.split("/")[-1])
         if self.download_loci:
             self.__download_wget(locus_url, output_file, working_dir=output_dir_genus)
-        return True
 
-    def download_pubmlst_scheme(self, scheme_url, output_dir_per_genus, genus):
+    def download_pubmlst_scheme(
+        self, scheme_url: str, output_dir_per_genus: Path, genus: str
+    ) -> dict[str, Any]:
         output_file = output_dir_per_genus.joinpath("scheme_summary_file")
         # Need to make it again because it is only made before if download_loci=True
         os.makedirs(output_dir_per_genus, exist_ok=True)
@@ -160,11 +174,11 @@ class cgMLSTSchemes(juno_helpers.JunoHelpers):
             scheme = json.load(scheme_definition)
         if self.download_loci:
             print(
-                self.message_formatter(
+                message_formatter(
                     f'Downloading {scheme["locus_count"]} loci from PubMLST server...'
                 )
             )
-            loci = db.from_sequence(scheme["loci"], npartitions=self.threads)
+            loci = db.from_sequence(scheme["loci"], npartitions=self.threads)  # type: ignore
             loci.map(
                 self.download_pubmlst_locus, output_dir_genus=output_dir_per_genus
             ).compute()
@@ -185,7 +199,9 @@ class cgMLSTSchemes(juno_helpers.JunoHelpers):
         return scheme_info
 
     # Adapted from: https://github.com/kristyhoran/coreuscan/blob/master/coreuscan/coreuscan.py
-    def download_enterobase_scheme(self, scheme_url, output_dir_per_genus):
+    def download_enterobase_scheme(
+        self, scheme_url: str, output_dir_per_genus: Path
+    ) -> dict[str, Any]:
         website_data = requests.get(scheme_url)
         website_data.raise_for_status()
         parsed_website_data = bs4.BeautifulSoup(website_data.text, "html.parser")
@@ -199,18 +215,20 @@ class cgMLSTSchemes(juno_helpers.JunoHelpers):
                     loci_list.append(locus_url)
         if self.download_loci:
             print(
-                self.message_formatter(
+                message_formatter(
                     f"Downloading {len(loci_list)} loci from Enterobase server..."
                 )
             )
-            loci = db.from_sequence(loci_list, npartitions=self.threads)
+            loci = db.from_sequence(loci_list, npartitions=self.threads)  # type: ignore
             loci.map(
                 self.download_enterobase_locus, output_dir_genus=output_dir_per_genus
             ).compute()
         scheme_info = {"scheme_description": None, "locus_count": len(loci_list)}
         return scheme_info
 
-    def download_seqsphere_scheme(self, scheme_url, output_dir_per_genus):
+    def download_seqsphere_scheme(
+        self, scheme_url: str, output_dir_per_genus: Path
+    ) -> dict[str, Any]:
         website_data = requests.get(scheme_url)
         website_data.raise_for_status()
         parsed_website_data = bs4.BeautifulSoup(website_data.text, "html.parser")
@@ -224,22 +242,24 @@ class cgMLSTSchemes(juno_helpers.JunoHelpers):
                     loci_list.append(locus_url)
         if self.download_loci:
             print(
-                self.message_formatter(
+                message_formatter(
                     f"Downloading {len(loci_list)} loci from SeqSphere+ server..."
                 )
             )
-            loci = db.from_sequence(loci_list, npartitions=self.threads)
+            loci = db.from_sequence(loci_list, npartitions=self.threads)  # type: ignore
             loci.map(
                 self.download_seqsphere_locus, output_dir_genus=output_dir_per_genus
             ).compute()
         scheme_info = {"scheme_description": None, "locus_count": len(loci_list)}
         return scheme_info
 
-    def download_cgmlst_scheme(self, genus_list):
+    def download_cgmlst_scheme(
+        self, genus_list: list[str]
+    ) -> Generator[Tuple[str, dict[str, Any]], None, None]:
         for genus in genus_list:
             source = self.schemes[genus]["source"]
             print(
-                self.message_formatter(
+                message_formatter(
                     f"Collecting cgMLST scheme for {genus.title()} from {source.title()}..."
                 )
             )
@@ -264,6 +284,8 @@ class cgMLSTSchemes(juno_helpers.JunoHelpers):
                 genus_scheme_info = self.download_seqsphere_scheme(
                     scheme_url, output_dir_per_genus
                 )
+            else:
+                genus_scheme_info = {}
             if self.download_loci:
                 genus_scheme_info["timestamp"] = self.date_and_time
                 genus_scheme_info["url"] = self.schemes[genus]["url"]
@@ -277,7 +299,7 @@ class cgMLSTSchemes(juno_helpers.JunoHelpers):
             yield genus, genus_scheme_info
 
 
-def main():
+def main() -> None:
     argument_parser = argparse.ArgumentParser(
         description="Download cgMLST schemes.",
         formatter_class=argparse.ArgumentDefaultsHelpFormatter,

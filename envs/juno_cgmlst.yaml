@@ -2,25 +2,31 @@ name: juno_cgmlst
 channels:
   - bioconda
   - conda-forge
+  - anaconda
+  - defaults
 dependencies:
-  - mamba=0.27.*
-  - mypy=0.*
   - python=3.10.*
-  - pandas=1.5
-  - drmaa==0.7.9
-  - snakemake=7.18.*
+  - mamba=1.2.*
+  - pandas=1.5.3
+  - pandas-stubs=1.5.3
+  - drmaa=0.7.9
+  - snakemake=7.25.*
   - xlrd=2.0.*
-  - pip=22.3.*
   - pyyaml=6.0
   - types-PyYaml=6.*
-  - numpy=1.23.*
   - dask=2022.11.0
-  - git=2.38.*
-  - biopython=1.80
-  - bs4=4.11
+  - git>=2.39
+  - setuptools=67.*
+  - types-setuptools=67.*
+  - black=23.*
+  - snakefmt=0.8.*
+  - bs4=4.12.*
+  - pip=23.*
+  - mypy=1.1.*
   - tabulate=0.9
-  - networkx=2.8
-  - pygraphviz=1.10
+  - biopython>=1.74
+  - pip=23.*
   - pip:
-    - numpy
-    - "--editable=git+https://github.com/RIVM-bioinformatics/base_juno_pipeline.git@v0.2.7#egg=base_juno"
+    - "--editable=git+https://github.com/RIVM-bioinformatics/juno-library.git@v2.0.1#egg=juno_library"
+    - types-beautifulsoup4
+    - types-requests
