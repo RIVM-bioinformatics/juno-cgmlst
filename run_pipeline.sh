@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# Wrapper for juno AMR pipeline
+# Wrapper for juno cgmlst pipeline
 
 set -euo pipefail
 
@@ -47,6 +47,13 @@ export -f __conda_activate
 export -f __conda_reactivate
 export -f __conda_hashr
 
+#----------------------------------------------#
+# Create the environment
+
+# we can use the base installation of mamba to create the environment. 
+# Swapping to a parent env is not necessary anymore.
+mamba env create -f envs/juno_cgmlst.yaml --name pipeline_env
+conda activate pipeline_env
 
 if [ ! -z ${irods_runsheet_sys__runsheet__lsf_queue} ]; then
     QUEUE="${irods_runsheet_sys__runsheet__lsf_queue}"
