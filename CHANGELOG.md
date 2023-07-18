@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.0.1](https://github.com/RIVM-bioinformatics/juno-cgmlst/compare/v1.0.0...v1.0.1) (2023-07-18)
+
+
+### Dependencies
+
+* removing anaconda and defaults channels and adding nodefaults channel ([007826b](https://github.com/RIVM-bioinformatics/juno-cgmlst/commit/007826bea249455a1c2945882ee7494de7d4a36b))
+
 ## [1.0.0](https://github.com/RIVM-bioinformatics/juno-cgmlst/compare/v0.2.2...v1.0.0) (2023-05-08)
 
 
