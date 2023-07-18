@@ -44,7 +44,7 @@ export -f __conda_hashr
 
 # we can use the base installation of mamba to create the environment. 
 # Swapping to a parent env is not necessary anymore.
-mamba env create -f envs/master_env.yaml --name pipeline_env
+mamba env create -f envs/juno_cgmlst.yaml --name pipeline_env
 conda activate pipeline_env
 
 
