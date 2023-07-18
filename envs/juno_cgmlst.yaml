@@ -2,6 +2,7 @@ name: juno_cgmlst
 channels:
   - bioconda
   - conda-forge
+  - nodefaults
 dependencies:
   - mamba=0.27.*
   - mypy=0.*
