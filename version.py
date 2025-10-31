@@ -1,4 +1,4 @@
-__version__ = "1.0.2"
+__version__ = "1.0.3"
 __package_name__ = "juno_cgmlst"
 __authors__ = "Alejandra Hernández Segura and Karim Hajji"
 __email__ = "karim.hajji@rivm.nl"
