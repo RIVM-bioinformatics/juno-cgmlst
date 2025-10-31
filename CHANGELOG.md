@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.0.3](https://github.com/RIVM-bioinformatics/juno-cgmlst/compare/v1.0.2...v1.0.3) (2025-10-31)
+
+
+### Bug Fixes
+
+* Add biopython v.1.85 dependency ([848712e](https://github.com/RIVM-bioinformatics/juno-cgmlst/commit/848712e1532bf260ff5411a36a8d69a90c6d5493))
+
 ## [1.0.2](https://github.com/RIVM-bioinformatics/juno-cgmlst/compare/v1.0.1...v1.0.2) (2024-05-21)
 
 
