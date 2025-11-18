@@ -113,10 +113,10 @@ rule hash_cgmlst_allele_sequences:
     output:
         OUT + '/cgmlst/{scheme}/hashed_allele_sequences.csv'
     message: "Getting hashes for the cgMLST allele sequences for scheme {wildcards.scheme}"
-        OUT + '/log/cgmlst/hashed_allele_sequences_{scheme}.log'
     log:
         OUT + '/log/cgmlst/hashed_allele_sequences_{scheme}.log'
     resources: mem_gb=config['mem_gb']['other']
+    threads: config['threads']['other']
     params:
         scheme = '{scheme}'
     shell:
