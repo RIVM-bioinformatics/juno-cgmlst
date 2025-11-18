@@ -55,9 +55,6 @@ chewBBACA.py GetAlleles --input "." \
                 --cpu ${threads}
 
 
-find "." -type f -name "results_alleles.tsv" -exec cp {} "." \;
-find "." -type f -name "results_alleles_hashed.tsv" -exec cp {} "." \;
-
 # The newly identified alleles have the 'INF-' prefix
 # That can cause issues when calculating the distance matrix
 # because they will be seen as diferent from the alleles
