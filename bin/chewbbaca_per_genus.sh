@@ -40,12 +40,8 @@ chewBBACA.py AlleleCall --cpu ${threads} \
                 # --ptf "$prodigal_training_file" \
                 # --fr
 
-
-# Check if AlleleCall produced the expected results
-if [ ! -f "results_alleles.tsv" ] || [ ! -f "results_alleles_hashed.tsv" ]; then
-    echo "Error: AlleleCall did not produce expected results files"
-    exit 1
-fi
+find "." -type f -name "results_alleles.tsv" -exec cp {} "." \;
+find "." -type f -name "results_alleles_hashed.tsv" -exec cp {} "." \;
 
 
 mkdir -p "GetAlleles_output"
