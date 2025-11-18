@@ -5,7 +5,7 @@ channels:
   - nodefaults
 dependencies:
   - biopython=1.85
-  - chewbbaca=3.2.0
+  - chewbbaca>=3.4.0
   - pip
   - pip:
     - PyYAML
