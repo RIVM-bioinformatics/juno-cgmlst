@@ -115,13 +115,15 @@ rule hash_cgmlst_allele_sequences:
     message: "Getting hashes for the cgMLST allele sequences for scheme {wildcards.scheme}"
     log:
         OUT + '/log/cgmlst/hashed_allele_sequences_{scheme}.log'
-    resources: mem_gb=config['mem_gb']['other']
-    threads: config['threads']['other']
+    resources: 
+        mem_gb=int(config["mem_gb"]["chewbbaca"]),
+    threads: int(config["threads"]["chewbbaca"])
     params:
         scheme = '{scheme}'
     shell:
         """
 python bin/setup_allele_sequences.py --input {input} \
+                                --scheme {params.scheme} \
                                 --output {output} &> {log}
         """
 
