@@ -71,6 +71,12 @@ def parse_args() -> tuple[str, str]:
         help="Input directory of fasta files from chewBBACA GetAlleles output.",
     )
     parser.add_argument(
+        "-s",
+        "--scheme",
+        required=True,
+        help="Name of the cgMLST scheme.",
+    )
+    parser.add_argument(
         "-o",
         "--output",
         required=True,
@@ -78,12 +84,12 @@ def parse_args() -> tuple[str, str]:
     )
 
     args = parser.parse_args()
-    return args.input, args.output
+    return args.input, args.scheme, args.output
 
 
 def main() -> None:
     """Main function to process allele sequences."""
-    input_dir, output_file = parse_args()
+    input_dir, scheme_name, output_file = parse_args()
     fasta_files = list_fasta_files(input_dir)
     all_sequences: dict[str, str] = {}
     for fasta_file in fasta_files:
