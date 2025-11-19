@@ -44,7 +44,7 @@ find "." -type f -name "results_alleles.tsv" -exec cp {} "." \;
 find "." -type f -name "results_alleles_hashed.tsv" -exec cp {} "." \;
 
 
-chewBBACA.py GetAlleles --input "." \
+chewBBACA.py GetAlleles --input "./results_alleles.tsv" \
                 --output-directory "GetAlleles_output" \
                 -g "${prepared_scheme}" \
                 --cpu ${threads}
