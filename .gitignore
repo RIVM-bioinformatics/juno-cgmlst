@@ -11,7 +11,7 @@ wget-log
 # Jupyter notebook tests
 *.ipynb
 
-
+temp_data/*
 
 ## Folders to ignore
 # From previous tests

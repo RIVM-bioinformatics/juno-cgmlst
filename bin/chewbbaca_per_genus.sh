@@ -49,6 +49,7 @@ chewBBACA.py GetAlleles --input "./results_alleles.tsv" \
                 -g "${prepared_scheme}" \
                 --cpu ${threads}
 
+cp -r "${input_files}" "./input_assemblies"
 
 # The newly identified alleles have the 'INF-' prefix
 # That can cause issues when calculating the distance matrix
