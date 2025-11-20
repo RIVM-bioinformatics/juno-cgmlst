@@ -82,6 +82,7 @@ rule cgmlst_per_scheme:
     output:
         chewbbaca_result=OUT + "/cgmlst/{scheme}/results_alleles.tsv",
         chewbbaca_hashed=OUT + "/cgmlst/{scheme}/results_alleles_hashed.tsv",
+        chewbbaca_sequences=directory(OUT + "/cgmlst/{scheme}/GetAlleles_output/"),
     message:
         "Running cgMLST for scheme {wildcards.scheme}"
     conda:
@@ -103,6 +104,8 @@ bash bin/chewbbaca_per_genus.sh {input.input_files} \
     {wildcards.scheme} &> {log}
         """
 
+
+# ----------------------- Hash cgMLST results alleles ------------------------#
 
 # rule hash_cgmlst:
 #     input:

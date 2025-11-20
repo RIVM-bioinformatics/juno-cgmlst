@@ -43,6 +43,16 @@ chewBBACA.py AlleleCall --cpu ${threads} \
 find "." -type f -name "results_alleles.tsv" -exec cp {} "." \;
 find "." -type f -name "results_alleles_hashed.tsv" -exec cp {} "." \;
 
+
+chewBBACA.py GetAlleles --input "./results_alleles.tsv" \
+                --output-directory "GetAlleles_output" \
+                -g "${prepared_scheme}" \
+                --cpu ${threads}
+
+input_dir=$(dirname "$(head -n1 "${input_files}")")
+mkdir -p "../../contigs"
+cp "${input_dir}"/*.fasta "../../contigs/" 2>/dev/null || true
+
 # The newly identified alleles have the 'INF-' prefix
 # That can cause issues when calculating the distance matrix
 # because they will be seen as diferent from the alleles
