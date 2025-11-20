@@ -105,29 +105,6 @@ bash bin/chewbbaca_per_genus.sh {input.input_files} \
         """
 
 
-# ----------------------- Hash cgMLST allele sequences -----------------------#
-
-rule hash_cgmlst_allele_sequences:
-    input:
-        rules.cgmlst_per_scheme.output.chewbbaca_sequences
-    output:
-        OUT + '/cgmlst/{scheme}/hashed_allele_sequences.csv'
-    message: "Getting hashes for the cgMLST allele sequences for scheme {wildcards.scheme}"
-    log:
-        OUT + '/log/cgmlst/hashed_allele_sequences_{scheme}.log'
-    resources: 
-        mem_gb=int(config["mem_gb"]["chewbbaca"]),
-    threads: int(config["threads"]["chewbbaca"])
-    params:
-        scheme = '{scheme}'
-    shell:
-        """
-python bin/setup_allele_sequences.py --input {input} \
-                                --scheme {params.scheme} \
-                                --output {output} &> {log}
-        """
-
-
 # ----------------------- Hash cgMLST results alleles ------------------------#
 
 # rule hash_cgmlst:
