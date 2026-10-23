@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.0.4](https://github.com/RIVM-bioinformatics/juno-cgmlst/compare/v1.0.3...v1.0.4) (2026-10-23)
+
+
+### Bug Fixes
+
+* installation fails due to old mamba version pinning, mamba should be provided by the host system ([#11](https://github.com/RIVM-bioinformatics/juno-cgmlst/issues/11)) ([1d45765](https://github.com/RIVM-bioinformatics/juno-cgmlst/commit/1d457655c57c7dc5d6bfa12b1eca2c81386c88b9))
+
 ## [1.0.3](https://github.com/RIVM-bioinformatics/juno-cgmlst/compare/v1.0.2...v1.0.3) (2025-10-31)
 
 
