@@ -28,6 +28,6 @@ dependencies:
   - importlib_resources 6.0.0
   - mamba==1.5.12
   - pip:
-      - "--editable=git+https://github.com/RIVM-bioinformatics/juno-library.git@v2.0.1#egg=juno_library"
-      - types-beautifulsoup4
-      - types-requests
+    - "--editable=git+https://github.com/RIVM-bioinformatics/juno-library.git@main#egg=juno_library"
+    - types-beautifulsoup4
+    - types-requests

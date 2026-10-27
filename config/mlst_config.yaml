@@ -1,0 +1,28 @@
+# MLST configuration file
+# LabSentiNL needs the IDs of the locus set, locus detection protocol, and locus code map
+# for each species to perform MLST analysis.
+
+salmonella:
+  locus_set_id: 019570fd-4652-0464-0cba-8d0ee0f4b304 # This is the enterobase salmonella version 2.0 locus set
+  locus_detection_protocol_id: 05a15d38-a1b8-4280-af82-262322f9e00a # This is chewBBACA version 3.4.2 with default parameters
+  locus_code_map_id: 79ba25db-378d-4718-b7b6-e8fb06a6c17f # This is mapping between locus codes and locus IDs for a specific scheme. In this case the enterobase salmonella scheme.
+
+escherichia:
+  locus_set_id: ""
+  locus_detection_protocol_id: ""
+  locus_code_map_id: ""
+
+listeria:
+  locus_set_id: ""
+  locus_detection_protocol_id: ""
+  locus_code_map_id: ""
+
+campylobacter:
+  locus_set_id: ""
+  locus_detection_protocol_id: ""
+  locus_code_map_id: ""
+
+staphylococcus:
+  locus_set_id: ""
+  locus_detection_protocol_id: ""
+  locus_code_map_id: ""
