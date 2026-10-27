@@ -26,6 +26,7 @@ dependencies:
   - pip=23.*
   - pulp=2.7.0
   - importlib_resources 6.0.0
+  - mamba==1.5.12
   - pip:
       - "--editable=git+https://github.com/RIVM-bioinformatics/juno-library.git@v2.0.1#egg=juno_library"
       - types-beautifulsoup4
