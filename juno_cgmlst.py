@@ -3,32 +3,26 @@ Juno-cgMLST pipeline
 Authors: Alejandra Hernandez-Segura
 Organization: Rijksinstituut voor Volksgezondheid en Milieu (RIVM)
 Department: Infektieziekteonderzoek, Diagnostiek en Laboratorium
-            Surveillance (IDS), Bacteriologie (BPD)
-Date: 06-05-2022
+            Surveillance (IDS), Bacteriologie (BPD)     
+Date: 06-05-2022  
 
 """
 
-import argparse
-import subprocess
-from dataclasses import dataclass
-from pathlib import Path
-
-import yaml
-
 # Dependencies
 from juno_library import Pipeline
+from version import __version__, __package_name__
+import argparse
+from pathlib import Path
+import subprocess
+import yaml
+from dataclasses import dataclass
 
 # Own scripts
 from bin import download_cgmlst_scheme
-from version import __package_name__, __version__
 
 
-def main(args: list[str] | None = None) -> None:
-
-    if args is not None:
-        juno_cgmlst = JunoCgmlst(args)
-    else:
-        juno_cgmlst = JunoCgmlst()
+def main() -> None:
+    juno_cgmlst = JunoCgmlst()
     juno_cgmlst.run()
 
 
@@ -103,9 +97,9 @@ class JunoCgmlst(Pipeline):
         for sample in self.sample_dict:
             genus = self.sample_dict[sample]["genus"]
             try:
-                self.sample_dict[sample]["cgmlst_scheme"] = (
-                    self.cgmlst_scheme_translation_tbl[genus]
-                )
+                self.sample_dict[sample][
+                    "cgmlst_scheme"
+                ] = self.cgmlst_scheme_translation_tbl[genus]
             except KeyError:
                 self.sample_dict[sample]["cgmlst_scheme"] = ""
 

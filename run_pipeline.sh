@@ -98,7 +98,7 @@ python juno_cgmlst.py \
     -i "$input_dir" \
     -o "$output_dir" \
     -g "$GENUS" \
-    -d "$DB_DIR" \
+    -d "$DB_DIR"
 
 result=$?
 

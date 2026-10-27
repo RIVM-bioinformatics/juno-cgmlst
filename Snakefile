@@ -39,29 +39,12 @@ CGMLST_DB = config["cgmlst_db"]
 
 localrules:
     all,
-    copy_mlst_config,
 
 
 rule all:
     input:
         expand(OUT + "/cgmlst/{scheme}/results_alleles.tsv", scheme=SCHEMES),
         expand(OUT + "/cgmlst/{scheme}/results_alleles_hashed.tsv", scheme=SCHEMES),
-        OUT + "/audit_trail/mlst_config.yaml",
-
-
-#################################################################################
-#####                    Copy config to audit trail                         #####
-#################################################################################
-
-rule copy_mlst_config:
-    input:
-        "config/mlst_config.yaml"
-    output:
-        OUT + "/audit_trail/mlst_config.yaml"
-    message:
-        "Copying MLST configuration to audit trail"
-    shell:
-        "cp {input} {output}"
 
 
 # @################################################################################
@@ -99,7 +82,6 @@ rule cgmlst_per_scheme:
     output:
         chewbbaca_result=OUT + "/cgmlst/{scheme}/results_alleles.tsv",
         chewbbaca_hashed=OUT + "/cgmlst/{scheme}/results_alleles_hashed.tsv",
-        chewbbaca_sequences=directory(OUT + "/cgmlst/{scheme}/GetAlleles_output/"),
     message:
         "Running cgMLST for scheme {wildcards.scheme}"
     conda:
@@ -121,8 +103,6 @@ bash bin/chewbbaca_per_genus.sh {input.input_files} \
     {wildcards.scheme} &> {log}
         """
 
-
-# ----------------------- Hash cgMLST results alleles ------------------------#
 
 # rule hash_cgmlst:
 #     input:
