@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.0.5](https://github.com/RIVM-bioinformatics/juno-cgmlst/compare/v1.0.4...v1.0.5) (2026-10-27)
+
+
+### Bug Fixes
+
+* pinned mamba to an earlier version ([6b19410](https://github.com/RIVM-bioinformatics/juno-cgmlst/commit/6b1941062e542512b84b142c97018f7be54ceaa5))
+
 ## [1.0.4](https://github.com/RIVM-bioinformatics/juno-cgmlst/compare/v1.0.3...v1.0.4) (2026-10-23)
 
 
